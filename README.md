@@ -5,14 +5,11 @@ It provides tools to train and evaluate *foundational neural quantum states* ove
 
 The project is designed to reuse NetKet's ecosystem (samplers, operators, logging, drivers) while introducing foundational workflows where one model is optimized across many parameter points at once.
 
-- NetKet: https://github.com/netket/netket
-- Documentation (NetKet): https://netket.readthedocs.io/
-
 ## Main Additions
 
 Compared to base NetKet, this package introduces:
 
-- `ParameterSpace`: a Hilbert-like space for Hamiltonian/control parameters.
+- `ParameterSpace`: a Hilbert space class for Hamiltonian/control parameters.
 - `FoundationalQuantumState`: a variational state that samples physical configurations together with parameter replicas.
 - `ParametrizedOperator`: operators whose matrix elements are generated from per-sample parameters.
 - `VMC_NG`: a natural-gradient VMC driver adapted to foundational training.
@@ -67,7 +64,7 @@ model = ViTFNQS(
 sampler = nk.sampler.MetropolisLocal(hi, n_chains=2048)
 vstate = nkf.FoundationalQuantumState(sampler, model, ps, n_replicas=8, seed=1)
 
-# Train the same model across 8 parameter points.
+# Define the coupling used during training
 vstate.parameter_array = jnp.linspace(0.8, 1.2, vstate.n_replicas).reshape(-1, 1)
 ```
 
