@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "netket-foundation"
+version = "0.1.0"
+description = "Foundation models and utilities for NetKet"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "netket @ git+https://github.com/netket/netket.git",
+    "nqxpack @ git+https://github.com/NeuralQXLab/nqxpack.git",
+    "matplotlib"
+]
+
+[tool.hatch.build]
+include = ["netket_foundation*"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
