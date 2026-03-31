@@ -1,7 +1,7 @@
 # NetKet Foundation
 
 NetKet Foundation is an extension library built on top of [NetKet](https://github.com/netket/netket) and [JAX](https://github.com/google/jax).
-It provides tools to train and evaluate *foundational neural quantum states* over families of Hamiltonians parameterized by couplings or disorder realizations.
+It provides tools to train and evaluate *foundation neural quantum states* over families of Hamiltonians parameterized by couplings or disorder realizations.
 
 The project is designed to reuse NetKet's ecosystem (samplers, operators, logging, drivers) while introducing foundational workflows where one model is optimized across many parameter points at once.
 
