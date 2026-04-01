@@ -8,17 +8,24 @@ version = "0.1.0"
 description = "Foundation models and utilities for NetKet"
 readme = "README.md"
 requires-python = ">=3.11"
+keywords = ["machine learning", "quantum physics", "neural quantum states", "netket"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
-    "netket @ git+https://github.com/netket/netket.git",
-    "nqxpack @ git+https://github.com/NeuralQXLab/nqxpack.git",
+    "netket>=3.22.0.dev3",
+    "nqxpack",
     "matplotlib"
 ]
 
+# [project.urls]
+# Homepage = "https://github.com/yourorg/netket_foundation"
+# Repository = "https://github.com/yourorg/netket_foundation"
+
 [tool.hatch.build]
 include = ["netket_foundation*"]
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
 [dependency-groups]
 dev = [
@@ -58,3 +65,15 @@ ignore = [
 [tool.black]
 line-length = 88
 target-version = ["py311", "py312", "py313"]
+
+# To easily bump versions from github
+[tool.bumpversion]
+current_version = "0.1.0"
+commit = true
+tag = true
+tag_name = "v{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
