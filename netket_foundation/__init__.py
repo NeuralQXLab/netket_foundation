@@ -10,4 +10,3 @@ from netket_foundation._src.driver.ngd.driver_vmc_ngd import VMC_NG as VMC_NG
 
 from netket_foundation import monkeypatch as monkeypatch
 from netket_foundation import operator as operator
-from netket_foundation import distributed as distributed

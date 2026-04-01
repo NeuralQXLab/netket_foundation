@@ -14,8 +14,6 @@ from netket.jax._jacobian.default_mode import JacobianMode
 from netket import jax as nkjax
 from netket.stats import statistics
 
-from netket_foundation._src import distributed as distributed
-
 # from netket._src.driver.abstract_optimization_driver import AbstractOptimizationDriver
 from netket.driver import VMC_SR
 from netket._src.ngd.sr_srt_common import get_samples_and_pdf

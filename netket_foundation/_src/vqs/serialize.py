@@ -14,7 +14,7 @@ from netket import config
 from netket.vqs import MCState
 from netket.utils import _serialization as serialization_utils
 
-from netket_foundation.distributed import replicate_sharding
+from jax.sharding import NamedSharding, PartitionSpec as P
 from netket_foundation._src.vqs.state import FoundationalQuantumState
 from netket_foundation._src.hilbert.parameter_space import ParameterSpace
 
@@ -103,7 +103,7 @@ serialization.register_serialization_state(
 
 def _replicate(x):
     if isinstance(x, jax.Array) and not x.is_fully_addressable:
-        return jax.lax.with_sharding_constraint(x, replicate_sharding())
+        return jax.lax.with_sharding_constraint(x, NamedSharding(jax.sharding.get_abstract_mesh(), P()))
     return x
 
 

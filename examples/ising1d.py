@@ -9,7 +9,6 @@ import jax
 import jax.numpy as jnp
 import netket as nk
 import netket_foundation as nkf
-import netket_foundation.distributed as nkpd
 import numpy as np
 import optax
 from advanced_drivers._src.callbacks.base import AbstractCallback
@@ -32,7 +31,7 @@ class SaveState(AbstractCallback, mutable=True):
         self._save_every = save_every
 
     def on_run_start(self, step, driver):
-        if nkpd.is_master_process() and not os.path.exists(self._path):
+        if jax.process_index() == 0 and not os.path.exists(self._path):
             os.makedirs(self._path)
 
         path = f"{self._path}/{self._prefix}_{driver.step_count}.nk"

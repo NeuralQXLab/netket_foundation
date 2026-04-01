@@ -54,7 +54,7 @@ from netket_foundation._src.operator.parametrized import (
     ParametrizedOperator,
 )  # noqa: F401
 
-from netket_foundation.distributed import replicate_sharding, sharding_along_axis
+from jax.sharding import NamedSharding, PartitionSpec as P
 from netket_foundation._src.hilbert.parameter_space import ParameterSpace
 from netket_foundation._src.nn.instance_wrapper import FoundationalInstance
 from netket_foundation._src.vqs.fidelity_susceptibility import susceptibility
@@ -252,7 +252,7 @@ class FoundationalQuantumState(VariationalState):
         dummy_input = self.hilbert.random_state(key, 1, dtype=dtype)
 
         if config.netket_experimental_sharding:
-            par_sharding = replicate_sharding()
+            par_sharding = NamedSharding(jax.sharding.get_abstract_mesh(), P())
         else:
             par_sharding = None
         variables = jax.jit(self._init_fun, out_shardings=par_sharding)(
@@ -681,7 +681,7 @@ def replace_parameters(samples, parameters):
     # Optionally reshape back to (Ns, N+M)
     samples_final = samples_updated.reshape(Ns, NM)
     return jax.lax.with_sharding_constraint(
-        samples_final, sharding_along_axis(samples_final, axis=0)
+        samples_final, NamedSharding(jax.sharding.get_abstract_mesh(), P("S"))
     )
 
 
