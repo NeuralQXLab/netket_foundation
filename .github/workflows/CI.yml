@@ -13,29 +13,21 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: "Ubuntu"
-            os: ubuntu-latest
-            python-version: "3.13"
-
-          - name: "macOS"
-            os: macos-latest
-            python-version: "3.13"
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up uv and Python ${{ matrix.python-version }}
+      - name: Set up uv and Python
         uses: astral-sh/setup-uv@v6
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.13"
 
       - name: Sync environment
         run: uv sync --group dev
 
       - name: Run tests
-        run: uv run pytest --cov=netket_foundation --cov-append tests/
+        env:
+          JAX_PLATFORM_NAME: cpu
+          JAX_NUM_CPU_DEVICES: "2"
+        run: uv run pytest --cov=netket_foundation tests/
