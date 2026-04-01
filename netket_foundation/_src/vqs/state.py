@@ -341,8 +341,6 @@ class FoundationalQuantumState(VariationalState):
         if chain_length <= 0:
             raise ValueError(f"Invalid chain length: chain_length={chain_length}")
 
-        n_samples = chain_length * self.sampler.n_chains
-
         self._chain_length = chain_length
         self.reset()
 
@@ -516,7 +514,9 @@ class FoundationalQuantumState(VariationalState):
         return jit_evaluate(self._apply_fun, self.variables, σ)
 
     @timing.timed
-    def local_estimators(self, op: ParametrizedOperator, *, chunk_size: int | None = None) -> jax.Array:
+    def local_estimators(
+        self, op: ParametrizedOperator, *, chunk_size: int | None = None
+    ) -> jax.Array:
         if chunk_size is None:
             chunk_size = self.chunk_size
 
@@ -531,9 +531,14 @@ class FoundationalQuantumState(VariationalState):
                 self._apply_fun, self.variables, σ, extra_args
             ).reshape(shape[:-1])
         else:
-            return jax.jit(foundational_kernel_jax_chunked, static_argnames=("logpsi", "chunk_size"))(
+            return jax.jit(
+                foundational_kernel_jax_chunked,
+                static_argnames=("logpsi", "chunk_size"),
+            )(
                 self._apply_fun, self.variables, σ, extra_args, chunk_size=chunk_size
-            ).reshape(shape[:-1])
+            ).reshape(
+                shape[:-1]
+            )
 
     @property
     def parameter_array(self) -> jax.Array:

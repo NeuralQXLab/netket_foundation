@@ -1,23 +1,19 @@
-from typing import Callable, Optional
-from functools import partial
+from typing import Callable
 
-import jax
-
-from flax import core as fcore
 
 from netket.optimizer.solver import cholesky
 from netket.utils.types import Array, Optimizer, ScalarOrSchedule
 from netket.operator import AbstractOperator
-from netket.utils import struct, timing
-from netket.vqs.mc import MCState, get_local_kernel, get_local_kernel_arguments
+from netket.utils import timing
+from netket.vqs.mc import MCState
 from netket.jax._jacobian.default_mode import JacobianMode
-from netket import jax as nkjax
 from netket.stats import statistics
 
 # from netket._src.driver.abstract_optimization_driver import AbstractOptimizationDriver
 from netket.driver import VMC_SR
 from netket._src.ngd.sr_srt_common import get_samples_and_pdf
 from netket_foundation._src.driver.ngd.sr_srt_common import sr, srt
+
 # from netket_foundation._src.driver.ngd.srt_onthefly import srt_onthefly
 
 
@@ -56,12 +52,12 @@ class VMC_NG(VMC_SR):
         optimizer: Optimizer,
         *,
         diag_shift: ScalarOrSchedule,
-        proj_reg: Optional[ScalarOrSchedule] = None,
-        momentum: Optional[ScalarOrSchedule] = None,
+        proj_reg: ScalarOrSchedule | None = None,
+        momentum: ScalarOrSchedule | None = None,
         linear_solver: Callable[[Array, Array], Array] = cholesky,
         variational_state: MCState = None,
-        chunk_size_bwd: Optional[int] = None,
-        mode: Optional[JacobianMode] = None,
+        chunk_size_bwd: int | None = None,
+        mode: JacobianMode | None = None,
         use_ntk: bool = False,
         on_the_fly: bool | None = False,
     ):
@@ -153,7 +149,7 @@ class VMC_NG(VMC_SR):
             proj_reg=proj_reg,
             momentum=momentum,
             old_updates=self._old_updates,
-            chunk_size=self.chunk_size_bwd
+            chunk_size=self.chunk_size_bwd,
         )
 
         return self._loss_stats, self._dp

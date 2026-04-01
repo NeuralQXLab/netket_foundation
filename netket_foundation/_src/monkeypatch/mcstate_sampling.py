@@ -1,4 +1,3 @@
-from typing import Optional
 from functools import partial
 
 import warnings
@@ -20,7 +19,11 @@ from netket.utils import timing
 from netket.utils.types import PyTree
 import netket.jax as nkjax
 
-from netket_foundation._src.monkeypatch.util import add_method, attach_method, attach_property
+from netket_foundation._src.monkeypatch.util import (
+    add_method,
+    attach_method,
+    attach_property,
+)
 
 
 def _none_is_inf(val):
@@ -175,14 +178,14 @@ def _concatenate_samples(
 def sample_distribution(
     self,
     distribution=None,
-    variables: Optional[PyTree] = None,
-    seed: Optional[int] = None,
+    variables: PyTree | None = None,
+    seed: int | None = None,
     *,
-    chain_length: Optional[int] = None,
-    n_samples: Optional[int] = None,
-    n_discard_per_chain: Optional[int] = None,
-    resample_fraction: Optional[float] = None,
-    chain_name: Optional[str] = None,
+    chain_length: int | None = None,
+    n_samples: int | None = None,
+    n_discard_per_chain: int | None = None,
+    resample_fraction: float | None = None,
+    chain_name: str | None = None,
     return_log_probabilities: bool = False,
     chunk_size: int | None = None,
 ) -> jax.Array | tuple[jax.Array, jax.Array]:
@@ -336,13 +339,13 @@ def sample_distribution(
 def samples_distribution(
     self,
     distribution=None,
-    variables: Optional[PyTree] = None,
-    seed: Optional[int] = None,
+    variables: PyTree | None = None,
+    seed: int | None = None,
     *,
-    resample_fraction: Optional[float] = None,
-    chain_name: Optional[str] = None,
+    resample_fraction: float | None = None,
+    chain_name: str | None = None,
     return_log_probabilities: bool = False,
-    chunk_size: Optional[int] = None,
+    chunk_size: int | None = None,
 ) -> jax.Array | tuple[jax.Array, jax.Array]:
     r"""Returns the samples for this model given a distribution.
 
@@ -423,7 +426,7 @@ def __copy__(self):
 
 
 @add_method(MCState)
-def replace_sampler_seed(self, seed: Optional[int] = None):
+def replace_sampler_seed(self, seed: int | None = None):
     """This function should be used to change the rng state of all samplers contained in a
     Monte Carlo State.
 
@@ -466,7 +469,7 @@ def samples(self) -> jax.Array:
 
 
 @property
-def sampler_state(self) -> Optional[SamplerState]:
+def sampler_state(self) -> SamplerState | None:
     return self.sampler_states.get(model_name, None)
 
 
@@ -506,7 +509,7 @@ add_method(_samples, MCState, override=True)
 
 #
 @property
-def resample_fraction(self) -> Optional[float]:
+def resample_fraction(self) -> float | None:
     """The fraction of the chain to resample at every sampling step.
 
     This is used to reduce the number of samples to be generated, while returning always the
@@ -516,7 +519,7 @@ def resample_fraction(self) -> Optional[float]:
 
 
 @resample_fraction.setter
-def resample_fraction(self, value: Optional[float]):
+def resample_fraction(self, value: float | None):
     if value is not None:
         chain_length_to_sample = int(max(self.chain_length * value, 1))
         new_resample_fraction = chain_length_to_sample / self.chain_length

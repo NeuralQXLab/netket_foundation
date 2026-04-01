@@ -103,7 +103,9 @@ serialization.register_serialization_state(
 
 def _replicate(x):
     if isinstance(x, jax.Array) and not x.is_fully_addressable:
-        return jax.lax.with_sharding_constraint(x, NamedSharding(jax.sharding.get_abstract_mesh(), P()))
+        return jax.lax.with_sharding_constraint(
+            x, NamedSharding(jax.sharding.get_abstract_mesh(), P())
+        )
     return x
 
 

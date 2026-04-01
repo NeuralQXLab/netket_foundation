@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Union
+from typing import Callable, Union
 from functools import partial
 
 import jax
@@ -10,6 +10,7 @@ from netket.utils import timing
 from netket.utils.types import Array, PyTree
 from netket._src.ngd.sr import _compute_sr_update
 from netket._src.ngd.srt import _compute_srt_update
+
 
 def _multiply_by_pdf(oks, pdf):
     """
@@ -29,7 +30,7 @@ def _prepare_input(
     *,
     mode: str,
     n_replicas: int,
-    pdf: Optional[jax.Array] = None,
+    pdf: jax.Array | None = None,
 ) -> tuple[jax.Array, jax.Array]:
     r"""
     Prepare the input for the SR/SRt solvers.
@@ -75,11 +76,11 @@ def _prepare_input(
     else:
         pdf_r = pdf.reshape(n_replicas, -1)
         pdf_cond = pdf_r / jnp.sum(pdf_r, axis=1, keepdims=True)
-        
+
         O_L = O_L - jnp.sum(_multiply_by_pdf(O_L, pdf_cond), axis=1, keepdims=True)
         de = local_grad_r - jnp.sum(local_grad_r * pdf_cond, axis=1, keepdims=True)
         de = de.flatten()
-        
+
         O_L = _multiply_by_pdf(O_L, jnp.sqrt(pdf_r))
         dv = 2.0 * de * jnp.sqrt(pdf.flatten())
 
@@ -122,12 +123,12 @@ def _sr_srt_common(
     diag_shift: Union[float, Array],
     solver_fn: Callable[[Array, Array], Array],
     mode: str,
-    proj_reg: Optional[Union[float, Array]] = None,
-    momentum: Optional[Union[float, Array]] = None,
-    old_updates: Optional[PyTree] = None,
-    chunk_size: Optional[int] = None,
+    proj_reg: Union[float, Array] | None = None,
+    momentum: Union[float, Array] | None = None,
+    old_updates: PyTree | None = None,
+    chunk_size: int | None = None,
     use_ntk: bool = False,
-    pdf: Optional[Array] = None,
+    pdf: Array | None = None,
 ):
     r"""
     Compute the Natural gradient update for the model specified by `log_psi({parameters, model_state}, samples)`
@@ -166,7 +167,9 @@ def _sr_srt_common(
         chunk_size=chunk_size,
     )  # jacobian is not centered
 
-    O_L, dv = _prepare_input(jacobians, local_grad, mode=mode, n_replicas=n_replicas, pdf=pdf)
+    O_L, dv = _prepare_input(
+        jacobians, local_grad, mode=mode, n_replicas=n_replicas, pdf=pdf
+    )
     if old_updates is None and momentum is not None:
         old_updates = jnp.zeros(jacobians.shape[-1], dtype=jacobians.dtype)
 
