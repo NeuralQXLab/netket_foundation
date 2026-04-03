@@ -1,4 +1,4 @@
-from netket_foundation._src.operator.embed import EmbedOperator as EmbedOperator
+from netket.operator import EmbedOperator as EmbedOperator
 
 from netket_foundation._src.operator.pauli_strings.jax import (
     PauliStringsJax as PauliStringsJax,

@@ -29,6 +29,7 @@ include = ["netket_foundation*"]
 
 [dependency-groups]
 dev = [
+    "ipython>=9",
     "pytest>=9.0.2",
     "pytest-cov>=6.0",
     "pre-commit>=4.0",

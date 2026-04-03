@@ -12,9 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
 from functools import partial, wraps
+from typing import TYPE_CHECKING
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from netket.operator import PauliStringsNumba
 
 import jax
 from jax import numpy as jnp
@@ -308,7 +314,7 @@ def _pauli_strings_n_conn_jax(x_flip_masks_all, z_data, x, cutoff=None):
 @register_pytree_node_class
 class PauliStringsJax(PauliStringsBase, DiscreteJaxOperator):
     """
-    Jax-compatible version of :class:`netket.operator.PauliStrings`.
+    Jax-compatible version of :class:`netket.operator.PauliStringsNumba`.
     """
 
     @wraps(PauliStringsBase.__init__)
@@ -463,7 +469,7 @@ class PauliStringsJax(PauliStringsBase, DiscreteJaxOperator):
         op._initialized = True
         return op
 
-    def to_numba_operator(self) -> "PauliStrings":  # noqa: F821
+    def to_numba_operator(self) -> PauliStringsNumba:
         """
         Returns the standard numba version of this operator, which is an
         instance of :class:`netket.operator.PauliStrings`.
