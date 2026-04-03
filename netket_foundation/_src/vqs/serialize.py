@@ -41,7 +41,7 @@ def serialize_FoundationalQuantumState(vstate):
     }
 
     sampler_states = {}
-    for key in vstate.sampler_states.keys():
+    for key in getattr(vstate, "sampler_states", {}).keys():
         # Do not double serialize the default sampler
         if key == "default":
             continue

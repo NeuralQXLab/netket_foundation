@@ -11,8 +11,6 @@ import netket as nk
 import netket_foundation as nkf
 import numpy as np
 import optax
-from advanced_drivers._src.callbacks.base import AbstractCallback
-from netket.utils import struct
 from scipy.stats import gaussian_kde
 from tqdm import tqdm
 
@@ -80,35 +78,6 @@ mz_p = nkf.operator.ParametrizedOperator(
     * (1 / float(hi.size)),
 )
 
-# xs = vs.hilbert.random_state(k, 5)
-# ha_p.get_conn_padded(xs)
-
-
-class SaveState(AbstractCallback, mutable=True):
-    """Persist the state periodically during optimization."""
-
-    _path: str = struct.field(pytree_node=False, serialize=False)
-    _prefix: str = struct.field(pytree_node=False, serialize=False)
-    _save_every: int = struct.field(pytree_node=False, serialize=False)
-
-    def __init__(self, path: str, save_every: int, prefix: str = "state"):
-        self._path = path
-        self._prefix = prefix
-        self._save_every = save_every
-
-    def on_run_start(self, step, driver):
-        if jax.process_index() == 0 and not os.path.exists(self._path):
-            os.makedirs(self._path)
-
-        path = f"{self._path}/{self._prefix}_{driver.step_count}.nk"
-        driver.state.save(path)
-
-    def on_step_end(self, step, log_data, driver):
-        if step % self._save_every == 0:
-            path = f"{self._path}/{self._prefix}_{driver.step_count}.nk"
-            driver.state.save(path)
-
-
 learning_rate = optax.linear_schedule(
     init_value=0.03, end_value=0.005, transition_steps=300
 )
@@ -117,11 +86,11 @@ gs = nkf.VMC_NG(ha_p, optimizer, variational_state=vs, diag_shift=1e-4)
 
 log = nk.logging.JsonLog("2")
 gs.run(
-    1000,
+    20,
     out=log,
     obs={"ham": ha_p, "mz": mz_p},
     step_size=10,
-    callback=SaveState(
+    callback=nk.logging.SaveVariationalState(
         "2",
         10,
     ),

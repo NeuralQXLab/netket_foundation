@@ -11,37 +11,10 @@ import netket as nk
 import netket_foundation as nkf
 import numpy as np
 import optax
-from advanced_drivers._src.callbacks.base import AbstractCallback
-from netket.utils import struct
+
 from tqdm import tqdm
 
 from netket_foundation._src.model.vit import ViTFNQS
-
-
-class SaveState(AbstractCallback, mutable=True):
-    """Persist the state periodically during optimization."""
-
-    _path: str = struct.field(pytree_node=False, serialize=False)
-    _prefix: str = struct.field(pytree_node=False, serialize=False)
-    _save_every: int = struct.field(pytree_node=False, serialize=False)
-
-    def __init__(self, path: str, save_every: int, prefix: str = "state"):
-        self._path = path
-        self._prefix = prefix
-        self._save_every = save_every
-
-    def on_run_start(self, step, driver):
-        if jax.process_index() == 0 and not os.path.exists(self._path):
-            os.makedirs(self._path)
-
-        path = f"{self._path}/{self._prefix}_{driver.step_count}.nk"
-        driver.state.save(path)
-
-    def on_step_end(self, step, log_data, driver):
-        if step % self._save_every == 0:
-            path = f"{self._path}/{self._prefix}_{driver.step_count}.nk"
-            driver.state.save(path)
-
 
 # Setup: model, space, sampler, and foundational state.
 key = jax.random.key(1)
@@ -99,10 +72,9 @@ driver = nkf.VMC_NG(ha_p, optimizer, variational_state=vs, diag_shift=1e-4)
 log = nk.logging.JsonLog("2")
 driver.run(
     1000,
-    out=log,
+    out=(log, nk.logging.SaveVariationalState("2", 10)),
     obs={"ham": ha_p, "mz": mz_p},
     step_size=10,
-    callback=SaveState("2", 10),
 )
 
 

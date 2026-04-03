@@ -683,42 +683,6 @@ def replace_parameters(samples, parameters):
     )
 
 
-# EXTRA
-from netket_foundation.monkeypatch import (  # noqa: E402
-    add_method,
-    attach_method,
-    attach_property,
-)
-from netket_foundation._src.monkeypatch import mcstate_sampling  # noqa: E402
-
-add_method(mcstate_sampling.init_sampler_distribution, FoundationalQuantumState)
-attach_method(mcstate_sampling.__init__, FoundationalQuantumState)
-attach_method(mcstate_sampling.reset, FoundationalQuantumState)
-add_method(mcstate_sampling.reset_hard, FoundationalQuantumState)
-attach_property(
-    mcstate_sampling.sampler,
-    cls=FoundationalQuantumState,
-    name="sampler",
-    mode="set",
-    prepend=True,
-)
-add_method(mcstate_sampling.sample_distribution, FoundationalQuantumState)
-add_method(mcstate_sampling.samples_distribution, FoundationalQuantumState)
-add_method(mcstate_sampling.__copy__, FoundationalQuantumState)
-add_method(mcstate_sampling.replace_sampler_seed, FoundationalQuantumState)
-attach_property(
-    mcstate_sampling.samples,
-    cls=FoundationalQuantumState,
-    name="samples",
-    mode="get",
-    prepend=False,
-)
-add_method(mcstate_sampling.sampler_state, FoundationalQuantumState)
-add_method(mcstate_sampling._sampler_state_previous, FoundationalQuantumState)
-add_method(mcstate_sampling._samples, FoundationalQuantumState, override=True)
-add_method(mcstate_sampling.resample_fraction, FoundationalQuantumState)
-
-
 @dispatch.dispatch
 def get_local_kernel_arguments(  # noqa: F811
     vstate: FoundationalQuantumState, Ô: ParametrizedOperator
