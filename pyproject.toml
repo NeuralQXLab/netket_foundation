@@ -33,6 +33,7 @@ dev = [
     "pytest>=9.0.2",
     "pytest-cov>=6.0",
     "pre-commit>=4.0",
+    "ipywidgets>=7.0",
 ]
 docs = [
     "sphinx-autobuild>=2024.0",

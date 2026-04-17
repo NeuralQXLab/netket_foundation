@@ -3,6 +3,7 @@
 import pytest
 import numpy as np
 import jax.numpy as jnp
+import netket as nk
 import netket_foundation as nkf
 from netket.stats import Stats
 from helpers import (
@@ -100,3 +101,23 @@ def test_get_state_returns_mcstate(vstate):
     params = vstate.parameter_array[0]
     sub = vstate.get_state(params)
     assert sub.hilbert == vstate.hilbert_physical
+
+
+def test_unsupported_sampler_raises():
+    """Passing a non-Metropolis sampler raises NotImplementedError."""
+    hi = make_hilbert()
+    ps = make_parameter_space()
+    model = make_model(ps)
+    exact_sampler = nk.sampler.ExactSampler(hi, n_chains=4)
+    with pytest.raises(NotImplementedError, match="not supported"):
+        nkf.FoundationalQuantumState(exact_sampler, model, ps, n_replicas=4)
+
+
+def test_n_chains_not_divisible_by_n_replicas_raises():
+    """n_replicas that does not divide n_chains raises ValueError."""
+    hi = make_hilbert()
+    ps = make_parameter_space()
+    model = make_model(ps)
+    sampler = nk.sampler.MetropolisLocal(hi, n_chains=4)
+    with pytest.raises(ValueError, match="n_replicas"):
+        nkf.FoundationalQuantumState(sampler, model, ps, n_replicas=3)

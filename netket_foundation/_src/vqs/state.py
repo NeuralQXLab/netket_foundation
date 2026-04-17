@@ -163,6 +163,15 @@ class FoundationalQuantumState(VariationalState):
         hilbert_physical = sampler.hilbert
         joint_space = hilbert_physical * parameter_space
 
+        if not isinstance(sampler, (MetropolisSampler, ParallelTemperingSampler)):
+            raise NotImplementedError(
+                f"Sampler of type {type(sampler)} is not supported. Only MetropolisSampler and ParallelTemperingSampler are supported."
+            )
+        if sampler.n_chains % n_replicas != 0:
+            raise ValueError(
+                f"The number of replicas (n_replicas={n_replicas}) must divide the number of chains in the sampler (sampler.n_chains={sampler.n_chains})."
+            )
+
         # Make a sampler that is sampler ⊗ FixedRule
         sampler = wrap_sampler(sampler, parameter_space, joint_space)
 
