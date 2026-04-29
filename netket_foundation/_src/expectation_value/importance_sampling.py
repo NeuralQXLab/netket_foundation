@@ -1,10 +1,10 @@
 """
-Importance Sampling pour NetKet.
+Importance Sampling for NetKet.
 
-Formule (auto-normalisee) :
+Self-normalized formula:
     <O>_target = sum_i w_i * O_loc_target(sigma_i) / sum_i w_i
 
-avec :
+with:
     w_i = |psi_target(sigma_i)|^2 / |psi_ref(sigma_i)|^2
     O_loc_target(sigma) = sum_eta <sigma|O|eta> * psi_target(eta) / psi_target(sigma)
     sigma_i ~ |psi_ref|^2
@@ -78,13 +78,13 @@ def _apply_chunked(apply_fn, samples, chunk_size):
 
 def expect_is(operator, mc_ref, target_variables, chunk_size=None):
     """
-    Calcule <O>_target par importance sampling a partir d'un MCState de reference.
+    Compute <O>_target by importance sampling from a reference MCState.
 
     Args:
-        operator:           Operateur netket (diagonal ou non-diagonal).
-        mc_ref:             nk.vqs.MCState deja echantillonne (mc_ref.sample() avant).
-        target_variables:   Dict de variables pour l'etat cible.
-        chunk_size:         Taille des chunks (None = tout d'un coup).
+        operator:           NetKet operator (diagonal or non-diagonal).
+        mc_ref:             nk.vqs.MCState already sampled (call mc_ref.sample() first).
+        target_variables:   Variables dict for the target state.
+        chunk_size:         Chunk size (None = all at once).
 
     Returns:
         ISResult(.stats, .ess, .ess_fraction, .n_samples)
