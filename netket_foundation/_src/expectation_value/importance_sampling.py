@@ -10,8 +10,6 @@ with:
     sigma_i ~ |psi_ref|^2
 """
 
-from dataclasses import dataclass
-
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -19,6 +17,7 @@ import numpy as np
 from netket.stats import Stats
 
 from netket.utils import struct
+
 
 @struct.dataclass
 class ISResult(struct.Pytree):
@@ -33,11 +32,13 @@ def _compute_is_weights(log_psi_target, log_psi_ref):
     log_w = log_w - jnp.max(log_w)
     weights = jnp.exp(log_w)
     W = jnp.sum(weights)
-    ess = float(W ** 2 / jnp.sum(weights ** 2))
+    ess = float(W**2 / jnp.sum(weights**2))
     return weights, ess
 
 
-def _compute_local_values(apply_fn, target_variables, samples, operator, chunk_size=None):
+def _compute_local_values(
+    apply_fn, target_variables, samples, operator, chunk_size=None
+):
     samples_np = np.asarray(samples)
     sigma_prime, mels = operator.get_conn_padded(samples_np)
     sigma_prime = jnp.asarray(sigma_prime)
@@ -102,7 +103,9 @@ def expect_is(operator, mc_ref, target_variables, chunk_size=None):
 
     ref_variables = mc_ref.variables
     if chunk_size is not None:
-        log_psi_ref = _apply_chunked(lambda s: apply_fn(ref_variables, s), samples, chunk_size)
+        log_psi_ref = _apply_chunked(
+            lambda s: apply_fn(ref_variables, s), samples, chunk_size
+        )
     else:
         log_psi_ref = apply_fn(ref_variables, samples)
 
