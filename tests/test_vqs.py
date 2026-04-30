@@ -108,7 +108,7 @@ def test_unsupported_sampler_raises():
     hi = make_hilbert()
     ps = make_parameter_space()
     model = make_model(ps)
-    exact_sampler = nk.sampler.ExactSampler(hi, n_chains=4)
+    exact_sampler = nk.sampler.ExactSampler(hi)
     with pytest.raises(NotImplementedError, match="not supported"):
         nkf.FoundationalQuantumState(exact_sampler, model, ps, n_replicas=4)
 
