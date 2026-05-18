@@ -78,17 +78,14 @@ from netket_foundation._src.vqs.fidelity_susceptibility import susceptibility
 
 
 def wrap_sampler(sampler, parameter_space, joint_space):
-    # Creiamo la regola congiunta: Sampler Fisico + Parametri Fissati
     joint_rule = rules.TensorRule(joint_space, rules=(sampler.rule, rules.FixedRule()))
 
-    # SE il sampler è un Parallel Tempering, dobbiamo restituire un PT Sampler
-    # preservando le configurazioni delle repliche e delle temperature.
     if isinstance(sampler, ParallelTemperingSampler):
         return ParallelTemperingSampler(
             joint_space,
             joint_rule,
             n_replicas=sampler.n_replicas,
-            betas=sampler._beta_distribution,  # Passiamo i beta già ordinati
+            betas=sampler._beta_distribution,  
             sweep_size=sampler.sweep_size,
             n_chains=sampler.n_chains,
             chunk_size=sampler.chunk_size,
@@ -96,7 +93,6 @@ def wrap_sampler(sampler, parameter_space, joint_space):
             dtype=float,  # O sampler.dtype
         )
 
-    # Altrimenti, comportamento standard (Metropolis classico)
     elif isinstance(sampler, MetropolisSampler):
         return MetropolisSampler(
             joint_space,
