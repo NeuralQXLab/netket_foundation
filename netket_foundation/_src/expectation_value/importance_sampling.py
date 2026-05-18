@@ -13,6 +13,7 @@ with:
 import jax
 import jax.numpy as jnp
 import numpy as np
+from flax import core as fcore
 
 from netket.stats import Stats
 
@@ -122,5 +123,64 @@ def expect_is(operator, mc_ref, target_variables, chunk_size=None):
         stats=stats,
         ess=ess,
         ess_fraction=ess / n_samples,
+        n_samples=n_samples,
+    )
+
+
+@struct.dataclass
+class QFIISResult(struct.Pytree):
+    chi: jax.Array   # (n_params, n_params)
+    ess: float
+    ess_fraction: float
+    n_samples: int
+
+
+def qfi_is(vs, parameters, mc_ref):
+    """
+    Compute the fidelity susceptibility chi at `parameters` via IS from mc_ref.
+
+    Args:
+        vs:         FoundationalQuantumState.
+        parameters: 1D array of shape (n_params,).
+        mc_ref:     MCState already sampled at a nearby reference point.
+
+    Returns:
+        QFIISResult(chi, ess, ess_fraction, n_samples)
+        where chi has shape (n_params, n_params).
+    """
+    parameters = jnp.asarray(parameters)
+    mc_tgt   = vs.get_state(parameters)
+    tgt_vars = mc_tgt.variables
+
+    samples = mc_ref.samples
+    if samples.ndim >= 3:
+        samples = jax.lax.collapse(samples, 0, 2)
+    n_samples = samples.shape[0]
+
+    apply_fn = mc_ref._apply_fun
+
+    log_psi_tgt = apply_fn(tgt_vars, samples)
+    log_psi_ref = apply_fn(mc_ref.variables, samples)
+    weights, ess = _compute_is_weights(log_psi_tgt, log_psi_ref)
+    W = jnp.sum(weights)
+
+    apply_fn_tgt = mc_tgt._apply_fun
+    vars_no_h, h_dict = fcore.pop(tgt_vars, "foundational")
+
+    def logpsi_h_batch(h, x_batch):
+        return apply_fn_tgt(fcore.copy(vars_no_h, {"foundational": h}), x_batch)
+
+    dlog = jax.jacfwd(logpsi_h_batch)(h_dict, samples)["parameters"]
+    # shape: (n_samples, n_params)
+
+    w_n = weights / W
+    mu  = jnp.einsum("i,ij->j", w_n, dlog)       # (n_params,)
+    d   = dlog - mu[None, :]                       # (n_samples, n_params)
+    chi = jnp.einsum("i,ij,ik->jk", w_n, d, d)   # (n_params, n_params)
+
+    return QFIISResult(
+        chi=chi,
+        ess=float(ess),
+        ess_fraction=float(ess / n_samples),
         n_samples=n_samples,
     )
