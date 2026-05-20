@@ -8,7 +8,7 @@ from netket.operator import AbstractOperator
 from netket.utils import timing, struct
 from netket.vqs.mc import MCState
 from netket.jax._jacobian.default_mode import JacobianMode
-from netket.stats import statistics, Stats
+from netket.stats import statistics, Stats, online_statistics
 
 # from netket._src.driver.abstract_optimization_driver import AbstractOptimizationDriver
 from netket.driver import VMC_SR
@@ -46,6 +46,7 @@ class VMC_NG(VMC_SR):
     """
 
     _replica_stats: Any = struct.field(pytree_node=False, serialize=False, default=None)
+    _replica_online_stats: Any = struct.field(pytree_node=False, serialize=False, default=None)
 
     def __init__(
         self,
@@ -143,21 +144,42 @@ class VMC_NG(VMC_SR):
         local_e_by_replica = local_energies.reshape(
             n_replicas, n_chains_per_replica, chain_length
         )
-        self._replica_stats = [statistics(local_e_by_replica[r]) for r in range(n_replicas)]
-        # Summarise all replicas.
-        # error_of_mean and variance are shown as relative quantities (divided by
-        # |mean|) so that replicas at different energy scales contribute equally.
+
+        decay = self._mcmc_convergence_diagnostics_ema_decay
+        if decay is not None:
+            if self._replica_online_stats is None:
+                self._replica_online_stats = [None] * n_replicas
+            self._replica_online_stats = [
+                online_statistics(
+                    local_e_by_replica[r],
+                    old_estimator=self._replica_online_stats[r],
+                    decay=decay,
+                    max_lag=32,
+                )
+                for r in range(n_replicas)
+            ]
+            self._replica_stats = [
+                self._replica_online_stats[r].get_stats() for r in range(n_replicas)
+            ]
+        else:
+            self._replica_stats = [
+                statistics(local_e_by_replica[r]) for r in range(n_replicas)
+            ]
+
+        # Combine per-replica Stats into a single summary.
+        # Mean: average of replica means.
+        # Error of mean: quadrature sum divided by n_replicas (SE of the grand mean).
+        # Variance: mean of per-replica variances.
+        # R_hat: max across replicas (most conservative convergence indicator).
         means = jnp.array([s.mean for s in self._replica_stats])
-        abs_means = jnp.abs(means)
+        errors = jnp.array([s.error_of_mean for s in self._replica_stats])
+        variances = jnp.array([s.variance for s in self._replica_stats])
+        rhats = jnp.array([s.R_hat for s in self._replica_stats])
         self._loss_stats = Stats(
             mean=jnp.mean(means),
-            error_of_mean=jnp.mean(
-                jnp.array([s.error_of_mean for s in self._replica_stats]) / (abs_means + 1e-12)
-            ),
-            variance=jnp.mean(
-                jnp.array([s.variance for s in self._replica_stats]) / (abs_means**2 + 1e-12)
-            ),
-            R_hat=jnp.mean(jnp.array([s.R_hat for s in self._replica_stats])),
+            error_of_mean=jnp.sqrt(jnp.nansum(errors**2)) / n_replicas,
+            variance=jnp.nansum(variances) / n_replicas,
+            R_hat=jnp.nanmax(rhats),
         )
 
         diag_shift = self.diag_shift
