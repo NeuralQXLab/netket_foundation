@@ -1,13 +1,14 @@
-from typing import Callable
+from typing import Any, Callable
 
+import jax.numpy as jnp
 
 from netket.optimizer.solver import cholesky
 from netket.utils.types import Array, Optimizer, ScalarOrSchedule
 from netket.operator import AbstractOperator
-from netket.utils import timing
+from netket.utils import timing, struct
 from netket.vqs.mc import MCState
 from netket.jax._jacobian.default_mode import JacobianMode
-from netket.stats import statistics
+from netket.stats import statistics, Stats
 
 # from netket._src.driver.abstract_optimization_driver import AbstractOptimizationDriver
 from netket.driver import VMC_SR
@@ -44,7 +45,7 @@ class VMC_NG(VMC_SR):
     no significant performance penalty.
     """
 
-    # _ham: AbstractOperator = struct.field(pytree_node=False, serialize=False)
+    _replica_stats: Any = struct.field(pytree_node=False, serialize=False, default=None)
 
     def __init__(
         self,
@@ -103,6 +104,9 @@ class VMC_NG(VMC_SR):
             use_ntk=use_ntk,
             on_the_fly=on_the_fly,
         )
+        # "Energy" is misleading: _loss_stats reports mean energy across replicas
+        # with relative (rescaled) error/variance, not a single-state energy.
+        self._loss_name = "Energy_replicas"
 
     @property
     def update_fn(self) -> Callable:
@@ -119,10 +123,43 @@ class VMC_NG(VMC_SR):
             else:
                 return sr
 
+    def _log_additional_data(self, log_dict):
+        super()._log_additional_data(log_dict)
+        if self._replica_stats is not None:
+            for r, s in enumerate(self._replica_stats):
+                log_dict[f"{self._loss_name}_r{r}"] = s
+
     @timing.timed
     def compute_loss_and_update(self):
         local_energies = self.state.local_estimators(self._ham)
-        self._loss_stats = statistics(local_energies)
+
+        # local_energies has shape (n_chains, chain_length) with chains blocked
+        # by replica. Compute per-replica statistics so the progress bar and
+        # log reflect physically meaningful energies at each h value.
+        n_replicas = self.state.n_replicas
+        n_chains = local_energies.shape[0]
+        chain_length = local_energies.shape[1] if local_energies.ndim > 1 else 1
+        n_chains_per_replica = n_chains // n_replicas
+        local_e_by_replica = local_energies.reshape(
+            n_replicas, n_chains_per_replica, chain_length
+        )
+        self._replica_stats = [statistics(local_e_by_replica[r]) for r in range(n_replicas)]
+        # Summarise all replicas.
+        # error_of_mean and variance are shown as relative quantities (divided by
+        # |mean|) so that replicas at different energy scales contribute equally.
+        means = jnp.array([s.mean for s in self._replica_stats])
+        abs_means = jnp.abs(means)
+        self._loss_stats = Stats(
+            mean=jnp.mean(means),
+            error_of_mean=jnp.mean(
+                jnp.array([s.error_of_mean for s in self._replica_stats]) / (abs_means + 1e-12)
+            ),
+            variance=jnp.mean(
+                jnp.array([s.variance for s in self._replica_stats]) / (abs_means**2 + 1e-12)
+            ),
+            R_hat=jnp.mean(jnp.array([s.R_hat for s in self._replica_stats])),
+        )
+
         diag_shift = self.diag_shift
         proj_reg = self.proj_reg
         momentum = self.momentum
