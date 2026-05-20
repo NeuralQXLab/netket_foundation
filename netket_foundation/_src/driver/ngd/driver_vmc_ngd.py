@@ -107,7 +107,7 @@ class VMC_NG(VMC_SR):
         )
         # "Energy" is misleading: _loss_stats reports mean energy across replicas
         # with relative (rescaled) error/variance, not a single-state energy.
-        self._loss_name = "Energy_replicas"
+        self._loss_name = "AvgEnergyReplicas"
 
     @property
     def update_fn(self) -> Callable:
