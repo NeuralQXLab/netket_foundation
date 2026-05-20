@@ -47,6 +47,7 @@ class VMC_NG(VMC_SR):
 
     _replica_stats: Any = struct.field(pytree_node=False, serialize=False, default=None)
     _replica_online_stats: Any = struct.field(pytree_node=False, serialize=False, default=None)
+    log_replica_stats: bool = struct.field(pytree_node=False, serialize=False, default=False)
 
     def __init__(
         self,
@@ -62,6 +63,7 @@ class VMC_NG(VMC_SR):
         mode: JacobianMode | None = None,
         use_ntk: bool = False,
         on_the_fly: bool | None = False,
+        log_replica_stats: bool = False,
     ):
         r"""
         Initialize the driver.
@@ -108,6 +110,7 @@ class VMC_NG(VMC_SR):
         # "Energy" is misleading: _loss_stats reports mean energy across replicas
         # with relative (rescaled) error/variance, not a single-state energy.
         self._loss_name = "AvgEnergyReplicas"
+        self.log_replica_stats = log_replica_stats
 
     @property
     def update_fn(self) -> Callable:
@@ -126,7 +129,7 @@ class VMC_NG(VMC_SR):
 
     def _log_additional_data(self, log_dict):
         super()._log_additional_data(log_dict)
-        if self._replica_stats is not None:
+        if self.log_replica_stats and self._replica_stats is not None:
             for r, s in enumerate(self._replica_stats):
                 log_dict[f"{self._loss_name}_r{r}"] = s
 
