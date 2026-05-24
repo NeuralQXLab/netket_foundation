@@ -50,3 +50,12 @@ linkcode_resolve = make_linkcode_resolve(
 # netket_foundation uses Google-style docstrings
 napoleon_google_docstring = True
 napoleon_numpy_docstring = False
+
+# Notebooks are pre-executed and stored with outputs; don't re-run at build time.
+nb_execution_mode = "off"
+nb_execution_allow_errors = False
+
+# Suppress warnings that originate from notebook cell formatting (transitions at
+# section boundaries, non-consecutive heading levels) that we cannot easily fix
+# without editing the notebook JSON.
+suppress_warnings = ["docutils", "myst.header"]

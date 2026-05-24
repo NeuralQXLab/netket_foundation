@@ -9,12 +9,13 @@ help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 html:
+	rm -rf api/generated
 	$(SPHINXBUILD) -b html "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O)
 	@echo ""
 	@echo "Done. Open $(BUILDDIR)/html/index.html"
 
 clean:
-	rm -rf "$(BUILDDIR)"
+	rm -rf "$(BUILDDIR)" api/generated
 
 livehtml:
 	sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)/html" \

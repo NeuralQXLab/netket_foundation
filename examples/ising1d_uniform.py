@@ -1,9 +1,5 @@
 """Train a foundational NQS on disordered Ising instances and benchmark on test draws."""
 
-import os
-
-os.environ["NETKET_EXPERIMENTAL_SHARDING"] = "1"
-
 import matplotlib.pyplot as plt
 import jax
 import jax.numpy as jnp

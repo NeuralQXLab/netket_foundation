@@ -4,3 +4,6 @@ from netket_foundation._src.expectation_value.importance_sampling import (
     qfi_is as qfi_is,
     QFIISResult as QFIISResult,
 )
+from netket_foundation._src.vqs.fidelity_susceptibility import (
+    susceptibility as susceptibility,
+)
