@@ -1,11 +1,11 @@
-"""Tests for ParametrizedOperator."""
+"""Tests for ParametrizedOperator and fermionic operators."""
 
 import pytest
 import numpy as np
 import jax
 import jax.numpy as jnp
 import netket_foundation as nkf
-from helpers import make_hilbert, make_parameter_space, make_ising
+from helpers import make_hilbert, make_parameter_space, make_ising, make_fermion_hilbert
 
 
 @pytest.fixture(scope="module")
@@ -91,3 +91,133 @@ def test_pytree_roundtrip(ham):
     leaves, treedef = jax.tree_util.tree_flatten(ham)
     ham2 = jax.tree_util.tree_unflatten(treedef, leaves)
     assert ham2.hilbert == ham.hilbert
+
+
+# ---------------------------------------------------------------------------
+# Fermionic operators
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def fhi():
+    return make_fermion_hilbert(n_orbitals=4)
+
+
+def _to_dense(op):
+    """Convert a fermionic operator to a dense numpy matrix."""
+    return op.to_sparse().toarray()
+
+
+class TestFermionConstructors:
+    def test_create_returns_operator(self, fhi):
+        op = nkf.operator.create(fhi, 0)
+        assert hasattr(op, "get_conn_padded")
+
+    def test_destroy_returns_operator(self, fhi):
+        op = nkf.operator.destroy(fhi, 0)
+        assert hasattr(op, "get_conn_padded")
+
+    def test_number_returns_operator(self, fhi):
+        op = nkf.operator.number(fhi, 0)
+        assert hasattr(op, "get_conn_padded")
+
+    def test_create_destroy_type(self, fhi):
+        from netket_foundation._src.operator.fermion2nd.numba import FermionOperator2nd
+        assert isinstance(nkf.operator.create(fhi, 0), FermionOperator2nd)
+        assert isinstance(nkf.operator.destroy(fhi, 0), FermionOperator2nd)
+        assert isinstance(nkf.operator.number(fhi, 0), FermionOperator2nd)
+
+
+class TestAnticommutation:
+    """Canonical anti-commutation relations: {c_i, c_j†} = δ_{ij}."""
+
+    def test_same_site(self, fhi):
+        # c_i c_i† + c_i† c_i = I
+        for i in range(fhi.size):
+            c  = nkf.operator.destroy(fhi, i)
+            cd = nkf.operator.create(fhi, i)
+            anticomm = _to_dense(c @ cd + cd @ c)
+            np.testing.assert_allclose(anticomm, np.eye(fhi.n_states), atol=1e-12)
+
+    def test_diff_site(self, fhi):
+        # c_i c_j† + c_j† c_i = 0 for i != j
+        for i in range(fhi.size):
+            for j in range(fhi.size):
+                if i == j:
+                    continue
+                ci  = nkf.operator.destroy(fhi, i)
+                cdj = nkf.operator.create(fhi, j)
+                anticomm = _to_dense(ci @ cdj + cdj @ ci)
+                np.testing.assert_allclose(anticomm, 0.0, atol=1e-12)
+
+
+class TestNumberOperator:
+    def test_number_equals_cdaggerc(self, fhi):
+        # n_i = c_i† c_i
+        for i in range(fhi.size):
+            n   = _to_dense(nkf.operator.number(fhi, i))
+            cdc = _to_dense(nkf.operator.create(fhi, i) @ nkf.operator.destroy(fhi, i))
+            np.testing.assert_allclose(n, cdc, atol=1e-12)
+
+    def test_number_is_projection(self, fhi):
+        # n_i^2 = n_i
+        for i in range(fhi.size):
+            n = _to_dense(nkf.operator.number(fhi, i))
+            np.testing.assert_allclose(n @ n, n, atol=1e-12)
+
+    def test_number_is_hermitian(self, fhi):
+        for i in range(fhi.size):
+            n = _to_dense(nkf.operator.number(fhi, i))
+            np.testing.assert_allclose(n, n.conj().T, atol=1e-12)
+
+
+class TestNumbaJaxAgreement:
+    """FermionOperator2nd (Numba) and FermionOperator2ndJax produce identical matrix elements."""
+
+    def test_hopping_mels(self, fhi):
+        from netket_foundation._src.operator.fermion2nd.jax import FermionOperator2ndJax
+
+        # H = c0† c1 + c1† c0
+        hop_numba = (
+            nkf.operator.create(fhi, 0) @ nkf.operator.destroy(fhi, 1)
+            + nkf.operator.create(fhi, 1) @ nkf.operator.destroy(fhi, 0)
+        )
+        hop_jax = hop_numba.to_jax_operator()
+        assert isinstance(hop_jax, FermionOperator2ndJax)
+
+        mat_numba = _to_dense(hop_numba)
+        mat_jax   = hop_jax.to_sparse().toarray()
+        np.testing.assert_allclose(mat_numba, mat_jax, atol=1e-12)
+
+    def test_number_mels(self, fhi):
+        n_numba = nkf.operator.number(fhi, 0) + nkf.operator.number(fhi, 1)
+        n_jax   = n_numba.to_jax_operator()
+        np.testing.assert_allclose(
+            _to_dense(n_numba), n_jax.to_sparse().toarray(), atol=1e-12
+        )
+
+
+class TestHoppingHamiltonian:
+    """Simple 2-site hopping: physical sanity checks."""
+
+    def _make_hopping(self, fhi):
+        return (
+            nkf.operator.create(fhi, 0) @ nkf.operator.destroy(fhi, 1)
+            + nkf.operator.create(fhi, 1) @ nkf.operator.destroy(fhi, 0)
+        )
+
+    def test_is_hermitian(self, fhi):
+        H = _to_dense(self._make_hopping(fhi))
+        np.testing.assert_allclose(H, H.conj().T, atol=1e-12)
+
+    def test_ground_state_energy(self, fhi):
+        # Single particle on 4 sites: E0 of hopping = -1 (1-particle sector)
+        hi2 = nkf.operator.create(fhi, 0).__class__.__mro__  # just make a 2-site system
+        import netket as nk
+        hi2 = nk.hilbert.SpinOrbitalFermions(2)
+        H = (
+            nkf.operator.create(hi2, 0) @ nkf.operator.destroy(hi2, 1)
+            + nkf.operator.create(hi2, 1) @ nkf.operator.destroy(hi2, 0)
+        )
+        evals = np.linalg.eigvalsh(_to_dense(H))
+        # ground state in the 1-particle sector is -1
+        assert np.any(np.abs(evals - (-1.0)) < 1e-10)

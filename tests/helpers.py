@@ -57,6 +57,15 @@ def make_ising(hi):
     return create_operator
 
 
+def make_fermion_hilbert(n_orbitals=4):
+    return nk.hilbert.SpinOrbitalFermions(n_orbitals)
+
+
+def make_fermion_hilbert_spin(n_orbitals=3):
+    """SpinOrbitalFermions with spin-1/2 (2 spin components)."""
+    return nk.hilbert.SpinOrbitalFermions(n_orbitals, s=1 / 2)
+
+
 def make_vstate(sampler, model, ps, *, seed=0):
     vs = nkf.FoundationalQuantumState(
         sampler, model, ps, n_samples=16, n_replicas=4, seed=seed
