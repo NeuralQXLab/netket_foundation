@@ -46,8 +46,12 @@ class VMC_NG(VMC_SR):
     """
 
     _replica_stats: Any = struct.field(pytree_node=False, serialize=False, default=None)
-    _replica_online_stats: Any = struct.field(pytree_node=False, serialize=False, default=None)
-    log_replica_stats: bool = struct.field(pytree_node=False, serialize=False, default=False)
+    _replica_online_stats: Any = struct.field(
+        pytree_node=False, serialize=False, default=None
+    )
+    log_replica_stats: bool = struct.field(
+        pytree_node=False, serialize=False, default=False
+    )
 
     def __init__(
         self,

@@ -16,8 +16,10 @@ from .fmhal1d import Encoder_FMHAL_roll1d
 from .fmhal2d import Encoder_FMHAL_roll2d
 from .output import OuputHead
 
+
 class foundation_ViT_trans_equi(nn.Module):
     """End-to-end Fermionic ViT model with optional equivariance and invariance."""
+
     n_layers: int
     d_model: int
     d_output: int
@@ -51,31 +53,31 @@ class foundation_ViT_trans_equi(nn.Module):
 
         if self.is_2d:
             self.encoder = Encoder_FMHAL_roll2d(
-                            n_patches=self.n_patches,
-                            b=self.b,
-                            graph=self.graph,
-                            n_layers=self.n_layers, 
-                            d_model=self.d_model, 
-                            use_uniform_init=self.use_uniform_init,
-                            heads=self.heads,
-                            is_equivariant=self.is_equivariant,
-                            initializer=self.initializer,
-                            param_dtype=self.param_dtype
-                            )
+                n_patches=self.n_patches,
+                b=self.b,
+                graph=self.graph,
+                n_layers=self.n_layers,
+                d_model=self.d_model,
+                use_uniform_init=self.use_uniform_init,
+                heads=self.heads,
+                is_equivariant=self.is_equivariant,
+                initializer=self.initializer,
+                param_dtype=self.param_dtype,
+            )
         else:
             self.encoder = Encoder_FMHAL_roll1d(
-                            n_patches=self.n_patches,
-                            b=self.b,
-                            graph=self.graph,
-                            n_layers=self.n_layers, 
-                            d_model=self.d_model, 
-                            use_uniform_init=self.use_uniform_init,
-                            heads=self.heads,
-                            is_equivariant=self.is_equivariant,
-                            initializer=self.initializer,
-                            param_dtype=self.param_dtype
-                            )
-        
+                n_patches=self.n_patches,
+                b=self.b,
+                graph=self.graph,
+                n_layers=self.n_layers,
+                d_model=self.d_model,
+                use_uniform_init=self.use_uniform_init,
+                heads=self.heads,
+                is_equivariant=self.is_equivariant,
+                initializer=self.initializer,
+                param_dtype=self.param_dtype,
+            )
+
         self.out = OuputHead(
             d_model=self.d_model,
             d_latent=self.d_latent,
@@ -90,11 +92,10 @@ class foundation_ViT_trans_equi(nn.Module):
 
     @nn.compact
     def __call__(self, x):
-
         """Apply the model independently to each configuration in the batch."""
 
         # Preserve the leading batch dimensions and flatten only the particle axis.
-        d_shape_in = x.shape[-1] # batch shape
+        d_shape_in = x.shape[-1]  # batch shape
         batch_shape_in = x.shape[:-1]
         x = x.reshape(-1, d_shape_in)
 
@@ -104,8 +105,8 @@ class foundation_ViT_trans_equi(nn.Module):
             x = self.embedding(x)
             x = self.encoder(x)
             return self.out(x)
-            
+
         out = compute_wavefunc(x)
-        out = out.reshape(*batch_shape_in,-1)
-            
+        out = out.reshape(*batch_shape_in, -1)
+
         return out

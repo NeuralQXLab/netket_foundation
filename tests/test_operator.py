@@ -97,6 +97,7 @@ def test_pytree_roundtrip(ham):
 # Fermionic operators
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="module")
 def fhi():
     return make_fermion_hilbert(n_orbitals=4)
@@ -122,6 +123,7 @@ class TestFermionConstructors:
 
     def test_create_destroy_type(self, fhi):
         from netket_foundation._src.operator.fermion2nd.numba import FermionOperator2nd
+
         assert isinstance(nkf.operator.create(fhi, 0), FermionOperator2nd)
         assert isinstance(nkf.operator.destroy(fhi, 0), FermionOperator2nd)
         assert isinstance(nkf.operator.number(fhi, 0), FermionOperator2nd)
@@ -133,7 +135,7 @@ class TestAnticommutation:
     def test_same_site(self, fhi):
         # c_i c_i† + c_i† c_i = I
         for i in range(fhi.size):
-            c  = nkf.operator.destroy(fhi, i)
+            c = nkf.operator.destroy(fhi, i)
             cd = nkf.operator.create(fhi, i)
             anticomm = _to_dense(c @ cd + cd @ c)
             np.testing.assert_allclose(anticomm, np.eye(fhi.n_states), atol=1e-12)
@@ -144,7 +146,7 @@ class TestAnticommutation:
             for j in range(fhi.size):
                 if i == j:
                     continue
-                ci  = nkf.operator.destroy(fhi, i)
+                ci = nkf.operator.destroy(fhi, i)
                 cdj = nkf.operator.create(fhi, j)
                 anticomm = _to_dense(ci @ cdj + cdj @ ci)
                 np.testing.assert_allclose(anticomm, 0.0, atol=1e-12)
@@ -154,7 +156,7 @@ class TestNumberOperator:
     def test_number_equals_cdaggerc(self, fhi):
         # n_i = c_i† c_i
         for i in range(fhi.size):
-            n   = _to_dense(nkf.operator.number(fhi, i))
+            n = _to_dense(nkf.operator.number(fhi, i))
             cdc = _to_dense(nkf.operator.create(fhi, i) @ nkf.operator.destroy(fhi, i))
             np.testing.assert_allclose(n, cdc, atol=1e-12)
 
@@ -177,20 +179,19 @@ class TestNumbaJaxAgreement:
         from netket_foundation._src.operator.fermion2nd.jax import FermionOperator2ndJax
 
         # H = c0† c1 + c1† c0
-        hop_numba = (
-            nkf.operator.create(fhi, 0) @ nkf.operator.destroy(fhi, 1)
-            + nkf.operator.create(fhi, 1) @ nkf.operator.destroy(fhi, 0)
-        )
+        hop_numba = nkf.operator.create(fhi, 0) @ nkf.operator.destroy(
+            fhi, 1
+        ) + nkf.operator.create(fhi, 1) @ nkf.operator.destroy(fhi, 0)
         hop_jax = hop_numba.to_jax_operator()
         assert isinstance(hop_jax, FermionOperator2ndJax)
 
         mat_numba = _to_dense(hop_numba)
-        mat_jax   = hop_jax.to_sparse().toarray()
+        mat_jax = hop_jax.to_sparse().toarray()
         np.testing.assert_allclose(mat_numba, mat_jax, atol=1e-12)
 
     def test_number_mels(self, fhi):
         n_numba = nkf.operator.number(fhi, 0) + nkf.operator.number(fhi, 1)
-        n_jax   = n_numba.to_jax_operator()
+        n_jax = n_numba.to_jax_operator()
         np.testing.assert_allclose(
             _to_dense(n_numba), n_jax.to_sparse().toarray(), atol=1e-12
         )
@@ -200,10 +201,9 @@ class TestHoppingHamiltonian:
     """Simple 2-site hopping: physical sanity checks."""
 
     def _make_hopping(self, fhi):
-        return (
-            nkf.operator.create(fhi, 0) @ nkf.operator.destroy(fhi, 1)
-            + nkf.operator.create(fhi, 1) @ nkf.operator.destroy(fhi, 0)
-        )
+        return nkf.operator.create(fhi, 0) @ nkf.operator.destroy(
+            fhi, 1
+        ) + nkf.operator.create(fhi, 1) @ nkf.operator.destroy(fhi, 0)
 
     def test_is_hermitian(self, fhi):
         H = _to_dense(self._make_hopping(fhi))
@@ -213,11 +213,11 @@ class TestHoppingHamiltonian:
         # Single particle on 4 sites: E0 of hopping = -1 (1-particle sector)
         hi2 = nkf.operator.create(fhi, 0).__class__.__mro__  # just make a 2-site system
         import netket as nk
+
         hi2 = nk.hilbert.SpinOrbitalFermions(2)
-        H = (
-            nkf.operator.create(hi2, 0) @ nkf.operator.destroy(hi2, 1)
-            + nkf.operator.create(hi2, 1) @ nkf.operator.destroy(hi2, 0)
-        )
+        H = nkf.operator.create(hi2, 0) @ nkf.operator.destroy(
+            hi2, 1
+        ) + nkf.operator.create(hi2, 1) @ nkf.operator.destroy(hi2, 0)
         evals = np.linalg.eigvalsh(_to_dense(H))
         # ground state in the 1-particle sector is -1
         assert np.any(np.abs(evals - (-1.0)) < 1e-10)

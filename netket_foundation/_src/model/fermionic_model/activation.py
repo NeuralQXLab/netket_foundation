@@ -1,5 +1,6 @@
 import jax.numpy as jnp
 
+
 def log_cosh(x):
     """Numerically stable log-cosh activation used by the readout head."""
     sgn_x = -2 * jnp.signbit(x.real) + 1

@@ -85,7 +85,7 @@ def wrap_sampler(sampler, parameter_space, joint_space):
             joint_space,
             joint_rule,
             n_replicas=sampler.n_replicas,
-            betas=sampler._beta_distribution,  
+            betas=sampler._beta_distribution,
             sweep_size=sampler.sweep_size,
             n_chains=sampler.n_chains,
             chunk_size=sampler.chunk_size,

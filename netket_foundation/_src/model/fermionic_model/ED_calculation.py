@@ -3,6 +3,7 @@ import scipy.sparse.linalg as spla
 import numpy as np
 import jax.numpy as jnp
 
+
 def exact_ground_state_energy(op):
 
     basis_states = np.asarray(op.hilbert.all_states(), dtype=np.int8)

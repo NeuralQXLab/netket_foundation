@@ -129,7 +129,7 @@ def expect_is(operator, mc_ref, target_variables, chunk_size=None):
 
 @struct.dataclass
 class QFIISResult(struct.Pytree):
-    chi: jax.Array   # (n_params, n_params)
+    chi: jax.Array  # (n_params, n_params)
     ess: float
     ess_fraction: float
     n_samples: int
@@ -149,7 +149,7 @@ def qfi_is(vs, parameters, mc_ref):
         where chi has shape (n_params, n_params).
     """
     parameters = jnp.asarray(parameters)
-    mc_tgt   = vs.get_state(parameters)
+    mc_tgt = vs.get_state(parameters)
     tgt_vars = mc_tgt.variables
 
     samples = mc_ref.samples
@@ -174,9 +174,9 @@ def qfi_is(vs, parameters, mc_ref):
     # shape: (n_samples, n_params)
 
     w_n = weights / W
-    mu  = jnp.einsum("i,ij->j", w_n, dlog)       # (n_params,)
-    d   = dlog - mu[None, :]                       # (n_samples, n_params)
-    chi = jnp.einsum("i,ij,ik->jk", w_n, d, d)   # (n_params, n_params)
+    mu = jnp.einsum("i,ij->j", w_n, dlog)  # (n_params,)
+    d = dlog - mu[None, :]  # (n_samples, n_params)
+    chi = jnp.einsum("i,ij,ik->jk", w_n, d, d)  # (n_params, n_params)
 
     return QFIISResult(
         chi=chi,
