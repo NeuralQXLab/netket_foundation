@@ -1,9 +1,5 @@
 """Train a foundational NQS on 1D Ising and compare against exact results."""
 
-import os
-
-os.environ["NETKET_EXPERIMENTAL_SHARDING"] = "1"
-
 import matplotlib.pyplot as plt
 import jax
 import jax.numpy as jnp

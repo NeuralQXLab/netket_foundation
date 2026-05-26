@@ -130,7 +130,7 @@ class Encoder(nn.Module):
         return x
 
 
-class OuputHead(nn.Module):
+class OutputHead(nn.Module):
     """Maps encoded tokens to log-amplitudes (and phases in complex mode)."""
 
     d_model: int
@@ -219,7 +219,7 @@ class ViTFNQS(nn.Module):
             two_dimensional=self.two_dimensional,
         )
 
-        self.output = OuputHead(self.d_model, complex=self.complex)
+        self.output = OutputHead(self.d_model, complex=self.complex)
 
     def __call__(self, x):
         n_coups = self.n_coups

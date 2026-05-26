@@ -9,3 +9,4 @@ from netket_foundation._src.vqs.state import (
 from netket_foundation._src.driver.ngd.driver_vmc_ngd import VMC_NG as VMC_NG
 
 from netket_foundation import operator as operator
+from netket_foundation import expectation_value as expectation_value

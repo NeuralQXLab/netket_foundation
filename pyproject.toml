@@ -17,7 +17,8 @@ classifiers = [
 dependencies = [
     "netket>=3.22.0.dev3",
     "nqxpack",
-    "matplotlib"
+    "matplotlib",
+    "pandas>=3.0.2",
 ]
 
 # [project.urls]

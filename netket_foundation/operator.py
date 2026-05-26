@@ -9,19 +9,6 @@ from netket_foundation._src.operator.pauli_strings.operators import (
     sigmaz as sigmaz,
 )
 
-from netket_foundation._src.operator.fermion2nd.jax import (
-    FermionOperator2ndJax as FermionOperator2ndJax,
-)
-
-from netket_foundation._src.operator.fermion2nd.numba import (
-    FermionOperator2nd as FermionOperator2nd,
-)
-
-from netket_foundation._src.operator.fermion2nd.fermion import (
-    create as create,
-    destroy as destroy,
-    number as number,
-)
 
 from netket_foundation._src.operator.parametrized import (
     ParametrizedOperator as ParametrizedOperator,
