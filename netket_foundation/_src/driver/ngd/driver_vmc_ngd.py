@@ -2,7 +2,7 @@ from typing import Any, Callable
 
 import jax.numpy as jnp
 
-from netket.optimizer.solver import cholesky
+from netket.optimizer.solver import cholesky_with_fallback
 from netket.utils.types import Array, Optimizer, ScalarOrSchedule
 from netket.operator import AbstractOperator
 from netket.utils import timing, struct
@@ -61,7 +61,7 @@ class VMC_NG(VMC_SR):
         diag_shift: ScalarOrSchedule,
         proj_reg: ScalarOrSchedule | None = None,
         momentum: ScalarOrSchedule | None = None,
-        linear_solver: Callable[[Array, Array], Array] = cholesky,
+        linear_solver: Callable[[Array, Array], Array] = cholesky_with_fallback,
         variational_state: MCState = None,
         chunk_size_bwd: int | None = None,
         mode: JacobianMode | None = None,
