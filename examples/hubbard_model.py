@@ -104,7 +104,7 @@ conv_data = []
 
 for i, pars in tqdm(enumerate(vs.parameter_array)):
     _ha = create_operator(pars)
-    ed = nk.exact.lanczos_ed(_ha, k=1)[0].item()
+    ed = nk.exact.lanczos_ed(_ha, k=1, compute_eigenvectors=False).item()
     conv_data.append(
         {
             "e0": log.data["ham"][i].Mean,
