@@ -3,7 +3,7 @@
 import pytest
 import jax
 import jax.numpy as jnp
-from netket_foundation._src.model.vit import ViTFNQS
+from netket_foundation.model import ViTFNQS
 
 # System layout: 4 spins, patch size 2 → L_eff=2; 1 coupling
 L = 4

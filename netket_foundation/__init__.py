@@ -12,3 +12,4 @@ from netket_foundation import operator as operator
 from netket_foundation import expectation_value as expectation_value
 from netket_foundation import observable as observable
 from netket_foundation import vqs as vqs
+from netket_foundation import model as model

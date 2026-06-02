@@ -42,9 +42,13 @@ out_activation = nn.tanh
 
 print("Model construction...")
 
-from netket_foundation._src.model.fermionic_model.fermi_vit.body import (
+from netket_foundation.model import (
     foundation_ViT_trans_equi,
+    foundation_backflow,
+    foundation_fermi_Jastrow_MLP,
+    ProductModule,
 )
+from netket.nn.activation import log_cosh
 
 vit = foundation_ViT_trans_equi(
     n_layers=n_layers,
@@ -61,18 +65,9 @@ vit = foundation_ViT_trans_equi(
     param_dtype=pars_type,
 )
 
-from netket_foundation._src.model.fermionic_model.fermi_backflow import (
-    foundation_backflow,
-)
-
 backflow = foundation_backflow(
     model=vit, hilbert=hi, graph=graph, param_dtype=pars_type
 )
-
-from netket_foundation._src.model.fermionic_model.fermi_jastrow import (
-    foundation_fermi_Jastrow_MLP,
-)
-from netket_foundation._src.model.fermionic_model.activation import log_cosh
 
 f_jastrow_mlp = foundation_fermi_Jastrow_MLP(
     n_layers=n_layers,
@@ -82,8 +77,6 @@ f_jastrow_mlp = foundation_fermi_Jastrow_MLP(
     param_dtype=pars_type,
     out_activation=log_cosh,
 )
-
-from netket_foundation._src.model.fermionic_model.prod_module import ProductModule
 
 J_multi = ProductModule(f_jastrow_mlp, backflow)
 
@@ -158,13 +151,9 @@ gs.run(
 print("Plotting convergence curves...")
 conv_data = []
 
-from netket_foundation._src.model.fermionic_model.ED_calculation import (
-    exact_ground_state_energy,
-)
-
 for i, pars in tqdm(enumerate(vs.parameter_array)):
     _ha = create_operator(pars)
-    ed = exact_ground_state_energy(_ha).item()
+    ed = nk.exact.lanczos_ed(_ha, k=1)[0].item()
 
     err_val = log.data["ham"][i].Mean - ed
     conv_data.append(

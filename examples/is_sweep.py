@@ -30,7 +30,7 @@ import netket_foundation as nkf
 import optax
 from tqdm import tqdm
 
-from netket_foundation._src.model.vit import ViTFNQS
+from netket_foundation.model import ViTFNQS
 from netket_foundation.expectation_value import (
     ISState,
     SamplesWithProb,

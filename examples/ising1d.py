@@ -10,7 +10,7 @@ import optax
 
 from tqdm import tqdm
 
-from netket_foundation._src.model.vit import ViTFNQS
+from netket_foundation.model import ViTFNQS
 
 # Setup: model, space, sampler, and foundational state.
 key = jax.random.key(1)

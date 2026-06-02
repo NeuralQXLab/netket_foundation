@@ -111,9 +111,7 @@ class VMC_NG(VMC_SR):
             use_ntk=use_ntk,
             on_the_fly=on_the_fly,
         )
-        # "Energy" is misleading: _loss_stats reports mean energy across replicas
-        # with relative (rescaled) error/variance, not a single-state energy.
-        self._loss_name = "AvgEnergyReplicas"
+        self._loss_name = "Mean Energy"
         self.log_replica_stats = log_replica_stats
 
     @property
