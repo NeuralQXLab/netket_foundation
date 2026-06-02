@@ -12,6 +12,22 @@ import flax.linen as nn
 
 
 def extract_patches_1d(x, graph, b):
+    """Split a 1D spin configuration into non-overlapping patches.
+
+    Parameters
+    ----------
+    x : array
+        Flattened spin configuration of length 2*L (two spin channels).
+    graph : netket.graph
+        Graph describing the lattice; used to obtain `n_nodes`.
+    b : int
+        Patch linear size (number of sites per patch in 1D).
+
+    Returns
+    -------
+    array
+        Patchified and concatenated spin features of shape (n_patches, 2*b).
+    """
     L = graph.n_nodes
     n_patches = L // b
     x = x.reshape(2, n_patches, b)

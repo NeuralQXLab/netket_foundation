@@ -1,3 +1,10 @@
+"""1D FMHAL encoder components and initializers.
+
+Provides compact initializers for structured attention kernels and a roll
+helper to build translationally-shifted attention matrices for 1D
+patch grids.
+"""
+
 import jax
 from jax import random
 import jax.numpy as jnp
@@ -10,6 +17,16 @@ from functools import partial
 
 
 def custom_uniform(scale=1e-2, dtype=jnp.float_):
+    """Return a small uniform initializer centered at zero.
+
+    Parameters
+    ----------
+    scale : float
+        Scale of the uniform distribution.
+    dtype : jax dtype
+        Dtype to use for the returned array.
+    """
+
     def init(key, shape, dtype=dtype):
         dtype = dtypes.canonicalize_dtype(dtype)
         return (2.0 * random.uniform(key, shape, dtype) - 1.0) * scale
@@ -18,35 +35,43 @@ def custom_uniform(scale=1e-2, dtype=jnp.float_):
 
 
 def custom_id(dtype=jnp.float_):
+    """Return an identity-like initializer for structured attention weights.
+
+    For equivariant (translationally invariant) parameterizations this
+    returns a tiled vector with a single one in the first position. For
+    the full (non-equivariant) case it returns a tiled identity matrix.
+    """
+
     def init(key, shape, dtype=dtype):
         dtype = jax.dtypes.canonicalize_dtype(dtype)
 
-        # CASO 1: Equivariante (shape richiesta è 2D: heads, n_patches)
+        # Equivariant compact form: (heads, n_patches)
         if len(shape) == 2:
             heads, n_patches = shape
             vector = jnp.zeros(n_patches, dtype=dtype)
             vector = vector.at[0].set(1.0)
             return jnp.tile(vector, (heads, 1))
 
-        # CASO 2: Non Equivariante (shape richiesta è 3D: heads, n_patches, n_patches)
+        # Full matrix form: (heads, n_patches, n_patches)
         elif len(shape) == 3:
             heads, n_patches, _ = shape
-            # Per il caso normale, l'identità è la classica matrice diagonale jnp.eye!
             identity_matrix = jnp.eye(n_patches, dtype=dtype)
             return jnp.tile(identity_matrix, (heads, 1, 1))
 
         else:
-            raise ValueError(f"Shape non supportata per custom_id: {shape}")
+            raise ValueError(f"Unsupported shape for custom_id: {shape}")
 
     return init
 
 
-# in_axes=(None, 0) significa: mantieni fisso base_J, fai scorrere i.
-# out_axes=1 significa: impila i risultati del vmap lungo l'asse 1 (diventano le righe della matrice).
 @partial(jax.vmap, in_axes=(None, 0), out_axes=1)
 def roll1d(base_J, i):
-    # base_J ha dimensione (heads, n_patches)
-    # jnp.roll fa slittare l'ultimo asse (le patch) di 'i' posizioni
+    """Return the `i`-shifted version of `base_J` along the patch axis.
+
+    This helper is vmap'd to build all circular shifts of a compact
+    (heads, n_patches) kernel into a full (heads, n_patches, n_patches)
+    tensor by stacking shifted copies along axis=1.
+    """
     return jnp.roll(base_J, i, axis=-1)
 
 
@@ -75,7 +100,6 @@ class FactoredAttention(nn.Module):
             self.full_J = self.base_J  # Non translational invariant.
 
         elif self.graph.pbc[0]:
-            # we need more parameters since the translation invariance is only along the y direction
 
             self.base_J = self.param(
                 "J", init, (self.heads, self.n_patches), dtype=self.param_dtype
@@ -85,7 +109,6 @@ class FactoredAttention(nn.Module):
             self.full_J = self.full_J.reshape(
                 self.heads, self.n_patches, self.n_patches
             )  # h matrices of size Np x Np
-            # jax.debug.print("🤯 {x} 🤯", x=self.full_J)
 
         else:
             raise ValueError(

@@ -102,6 +102,12 @@ class foundation_ViT_trans_equi(nn.Module):
         # Vectorize the single-sample wavefunction evaluation across the batch.
         @partial(jnp.vectorize, signature="(x)->(n)")
         def compute_wavefunc(x):
+            """Compute the model output for a single flattened configuration.
+
+            The function is deliberately written for use with ``jnp.vectorize``
+            so that the module can be applied efficiently across an arbitrary
+            leading batch shape after flattening the particle axis.
+            """
             x = self.embedding(x)
             x = self.encoder(x)
             return self.out(x)
