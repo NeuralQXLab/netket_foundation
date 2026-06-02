@@ -4,7 +4,6 @@ os.environ["NETKET_EXPERIMENTAL_SHARDING"] = "1"
 
 import netket_foundation as nkf
 import netket as nk
-import flax.linen as nn
 import matplotlib.pyplot as plt
 import jax.numpy as jnp
 import numpy as np
@@ -12,16 +11,14 @@ import jax
 import optax
 from tqdm import tqdm
 
-initializer = nn.initializers.lecun_normal()
+from netket_foundation.operator import create as fcdag
+from netket_foundation.operator import destroy as fc
+from netket_foundation.operator import number as fnc
+from netket_foundation.model import ViTFermionicFNQS
 
 seed = 42
 key = jax.random.PRNGKey(seed)
 pars_type = jnp.float64
-
-# Hamiltonian
-from netket_foundation.operator import create as fcdag
-from netket_foundation.operator import destroy as fc
-from netket_foundation.operator import number as fnc
 
 L = 8
 graph = nk.graph.Chain(L, pbc=True)
@@ -31,61 +28,26 @@ hi = nk.hilbert.SpinOrbitalFermions(
     N, s=1 / 2, n_fermions_per_spin=(N_fermions, N_fermions)
 )
 
-n_layers = 2
-d_output = hi.n_orbitals * hi.n_fermions
-d_latent = 8
-heads = 2
-b = 2
-n_patches = 4
 n_coups = 1
-out_activation = nn.tanh
+ps = nkf.ParameterSpace(N=1, min=0.0, max=4.0)
 
 print("Model construction...")
 
-from netket_foundation.model import (
-    foundation_ViT_trans_equi,
-    foundation_backflow,
-    foundation_fermi_Jastrow_MLP,
-    ProductModule,
-)
-from netket.nn.activation import log_cosh
-
-vit = foundation_ViT_trans_equi(
-    n_layers=n_layers,
-    d_model=d_latent,
-    d_output=d_output,
-    d_latent=d_latent,
-    heads=heads,
-    b=b,
-    is_2d=False,
-    n_patches=n_patches,
-    n_coups=n_coups,
+ma = ViTFermionicFNQS(
+    hilbert=hi,
     graph=graph,
-    out_activation=out_activation,
-    param_dtype=pars_type,
-)
-
-backflow = foundation_backflow(
-    model=vit, hilbert=hi, graph=graph, param_dtype=pars_type
-)
-
-f_jastrow_mlp = foundation_fermi_Jastrow_MLP(
-    n_layers=n_layers,
     n_coups=n_coups,
-    d_model=d_latent,
-    initializer=initializer,
+    num_layers=2,
+    d_model=8,
+    heads=2,
+    b=2,
     param_dtype=pars_type,
-    out_activation=log_cosh,
 )
-
-J_multi = ProductModule(f_jastrow_mlp, backflow)
 
 print("Model initialization...")
 
-key, subkey = jax.random.split(key)
 parameter_array = jnp.linspace(0.0, 4.0, 50, dtype=pars_type).reshape(-1, 1)
 n_replicas = parameter_array.shape[0]
-ps = nkf.ParameterSpace(N=1, min=0.0, max=4.0)
 
 sa = nk.sampler.MetropolisFermionHop(
     hilbert=hi,
@@ -95,15 +57,13 @@ sa = nk.sampler.MetropolisFermionHop(
 )
 
 vs = nkf.FoundationalQuantumState(
-    sa, J_multi, ps, n_replicas=n_replicas, seed=seed, n_samples=n_replicas * 16
+    sa, ma, ps, n_replicas=n_replicas, seed=seed, n_samples=n_replicas * 16
 )
-
 vs.parameter_array = parameter_array
 
 print("Model training...")
 
 up, down = +1, -1
-
 bonds_nn = [tuple(e) for e in graph.edges()]
 
 
@@ -116,9 +76,7 @@ def create_operator(params):
         for i, j in bonds_nn
         for spin in (up, down)
     )
-
     H_U = sum(fnc(hi, i, up) @ fnc(hi, i, down) for i in range(graph.n_nodes))
-
     H = -t * H_t.to_jax_operator() + U * H_U.to_jax_operator()
     return H
 
@@ -127,26 +85,15 @@ ha_p = nkf.operator.ParametrizedOperator(hi, ps, create_operator)
 
 epochs = 500
 lr = 5e-2
-lr_factor = 0.001
-
-lr_scheduler = optax.cosine_decay_schedule(
-    init_value=lr, decay_steps=epochs, alpha=lr_factor
-)
+lr_scheduler = optax.cosine_decay_schedule(init_value=lr, decay_steps=epochs, alpha=0.001)
 print("n_params:", vs.n_parameters)
 
 optimizer = optax.sgd(learning_rate=lr_scheduler)
 ds = optax.linear_schedule(1e-4, 1e-8, transition_steps=epochs)
-gs = nkf.VMC_NG(
-    ha_p, optimizer, variational_state=vs, diag_shift=ds, use_ntk=True, mode="real"
-)
+gs = nkf.VMC_NG(ha_p, optimizer, variational_state=vs, diag_shift=ds, use_ntk=True, mode="real")
 
 log = nk.logging.JsonLog("hubbard_model_log")
-
-gs.run(
-    epochs,
-    out=log,
-    obs={"ham": ha_p},
-)
+gs.run(epochs, out=log, obs={"ham": ha_p})
 
 print("Plotting convergence curves...")
 conv_data = []
@@ -154,8 +101,6 @@ conv_data = []
 for i, pars in tqdm(enumerate(vs.parameter_array)):
     _ha = create_operator(pars)
     ed = nk.exact.lanczos_ed(_ha, k=1)[0].item()
-
-    err_val = log.data["ham"][i].Mean - ed
     conv_data.append(
         {
             "e0": log.data["ham"][i].Mean,
@@ -166,10 +111,7 @@ for i, pars in tqdm(enumerate(vs.parameter_array)):
     )
 
 for _data in conv_data:
-    plt.plot(
-        _data["iters"],
-        np.abs(_data["err_val"] / _data["e0"]),
-    )
+    plt.plot(_data["iters"], np.abs(_data["err_val"] / _data["e0"]))
 
 plt.xlabel("Iteration")
 plt.ylabel("Rel Error")
