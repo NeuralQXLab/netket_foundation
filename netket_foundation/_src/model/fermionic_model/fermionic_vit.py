@@ -18,6 +18,7 @@ def ViTFermionicFNQS(
     d_model: int,
     heads: int,
     b: int = 2,
+    two_dimensional: bool = False,
     use_jastrow: bool = True,
     mean_field_init: str = "default",
     enforce_spin_flip: bool = False,
@@ -44,7 +45,12 @@ def ViTFermionicFNQS(
     heads:
         Number of attention heads.
     b:
-        Patch size (``graph.n_nodes`` must be divisible by ``b``).
+        Patch size. For 1D: ``graph.n_nodes`` must be divisible by ``b``.
+        For 2D: ``graph.n_nodes`` must be divisible by ``b²``.
+    two_dimensional:
+        If ``True``, use 2D patch embedding and a 2D equivariant encoder.
+        ``n_patches`` is derived as ``graph.n_nodes // b²`` instead of
+        ``graph.n_nodes // b``.
     use_jastrow:
         If ``True`` (default) wraps the backflow with a Jastrow MLP via
         ``ProductModule``. Set to ``False`` to use backflow alone.
@@ -65,7 +71,7 @@ def ViTFermionicFNQS(
         A ``ProductModule(jastrow, backflow)`` when ``use_jastrow=True``,
         or a bare ``foundation_backflow`` when ``use_jastrow=False``.
     """
-    n_patches = graph.n_nodes // b
+    n_patches = graph.n_nodes // (b**2 if two_dimensional else b)
     d_output = hilbert.n_orbitals * hilbert.n_fermions
 
     vit = foundation_ViT_trans_equi(
@@ -75,7 +81,7 @@ def ViTFermionicFNQS(
         d_latent=d_model,
         heads=heads,
         b=b,
-        is_2d=False,
+        is_2d=two_dimensional,
         n_patches=n_patches,
         n_coups=n_coups,
         graph=graph,
