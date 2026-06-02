@@ -111,9 +111,7 @@ class foundation_backflow(nn.Module):
         a complex log-sum-exp.
         """
 
-        logpsi_flipped = logpsi.reshape(
-            (-1, 2), order="F"
-        )
+        logpsi_flipped = logpsi.reshape((-1, 2), order="F")
         logpsi_symm = logsumexp_cplx(a=logpsi_flipped, b=1 / 2, axis=1)
         return logpsi_symm
 
