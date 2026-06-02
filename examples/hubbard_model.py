@@ -85,12 +85,16 @@ ha_p = nkf.operator.ParametrizedOperator(hi, ps, create_operator)
 
 epochs = 500
 lr = 5e-2
-lr_scheduler = optax.cosine_decay_schedule(init_value=lr, decay_steps=epochs, alpha=0.001)
+lr_scheduler = optax.cosine_decay_schedule(
+    init_value=lr, decay_steps=epochs, alpha=0.001
+)
 print("n_params:", vs.n_parameters)
 
 optimizer = optax.sgd(learning_rate=lr_scheduler)
 ds = optax.linear_schedule(1e-4, 1e-8, transition_steps=epochs)
-gs = nkf.VMC_NG(ha_p, optimizer, variational_state=vs, diag_shift=ds, use_ntk=True, mode="real")
+gs = nkf.VMC_NG(
+    ha_p, optimizer, variational_state=vs, diag_shift=ds, use_ntk=True, mode="real"
+)
 
 log = nk.logging.JsonLog("hubbard_model_log")
 gs.run(epochs, out=log, obs={"ham": ha_p})
