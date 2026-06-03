@@ -1,4 +1,4 @@
-"""Integration test for VMC_NG driver: single optimisation step."""
+"""Integration test for VMC_SR driver: single optimisation step."""
 
 import pytest
 import numpy as np
@@ -45,7 +45,7 @@ def ham(hi, ps):
 def driver(sampler, model, ps, ham):
     vs = make_vstate(sampler, model, ps, seed=99)
     optimizer = optax.sgd(0.01)
-    return nkf.VMC_NG(ham, optimizer, variational_state=vs, diag_shift=1e-3)
+    return nkf.VMC_SR(ham, optimizer, variational_state=vs, diag_shift=1e-3)
 
 
 def test_single_step_runs(driver):

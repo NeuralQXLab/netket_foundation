@@ -78,7 +78,7 @@ learning_rate = optax.linear_schedule(
     init_value=0.03, end_value=0.005, transition_steps=300
 )
 optimizer = optax.sgd(learning_rate)
-gs = nkf.VMC_NG(ha_p, optimizer, variational_state=vs, diag_shift=1e-4)
+gs = nkf.VMC_SR(ha_p, optimizer, variational_state=vs, diag_shift=1e-4)
 
 log = nk.logging.JsonLog("2")
 gs.run(

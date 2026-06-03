@@ -67,7 +67,7 @@ ha = nkf.operator.ParametrizedOperator(hi, ps, create_operator)
 
 # --- Optimize ---
 optimizer = optax.sgd(0.005)
-gs = nkf.VMC_NG(ha, optimizer, variational_state=vs, diag_shift=1e-4)
+gs = nkf.VMC_SR(ha, optimizer, variational_state=vs, diag_shift=1e-4)
 gs.run(n_iter=300)
 ```
 

@@ -12,7 +12,7 @@ Compared to base NetKet, this package introduces:
 - `ParameterSpace`: a Hilbert space class for Hamiltonian/control parameters.
 - `FoundationalQuantumState`: a variational state that samples physical configurations together with parameter replicas.
 - `ParametrizedOperator`: operators whose matrix elements are generated from per-sample parameters.
-- `VMC_NG`: a natural-gradient VMC driver adapted to foundational training.
+- `VMC_SR`: a natural-gradient VMC driver adapted to foundational training.
 
 ## Installation
 
@@ -92,7 +92,7 @@ import optax
 import netket_foundation as nkf
 
 optimizer = optax.sgd(5e-3)
-driver = nkf.VMC_NG(ham, optimizer, variational_state=vstate, diag_shift=1e-4)
+driver = nkf.VMC_SR(ham, optimizer, variational_state=vstate, diag_shift=1e-4)
 driver.run(100)
 ```
 

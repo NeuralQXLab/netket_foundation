@@ -143,7 +143,7 @@ print("n_params:", vs.n_parameters)
 
 optimizer = optax.sgd(learning_rate=lr_scheduler)
 ds = optax.linear_schedule(1e-4, 1e-8, transition_steps=epochs)
-gs = nkf.VMC_NG(
+gs = nkf.VMC_SR(
     ha_p, optimizer, variational_state=vs, diag_shift=ds, use_ntk=True, mode="real"
 )
 
