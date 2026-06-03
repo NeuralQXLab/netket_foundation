@@ -1,7 +1,5 @@
 """Integration test for VMC_SR driver: single optimisation step."""
 
-import sys
-
 import pytest
 import numpy as np
 import jax
@@ -189,6 +187,7 @@ def test_onthefly_chunked_vs_dense(complex):
         driver_otf.state.parameters,
         driver_dense.state.parameters,
     )
+
 
 # # Sharding must be enabled before JAX initialises, so run the sharded parity
 # # check in a subprocess with multiple simulated devices. n_chains=4 / n_replicas=4
