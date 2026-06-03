@@ -14,8 +14,7 @@ from netket.stats import statistics, Stats, online_statistics
 from netket.driver import VMC_SR as NetKetVMC_SR
 from netket._src.ngd.sr_srt_common import get_samples_and_pdf
 from netket_foundation._src.driver.ngd.sr_srt_common import sr, srt
-
-# from netket_foundation._src.driver.ngd.srt_onthefly import srt_onthefly
+from netket_foundation._src.driver.ngd.srt_onthefly import srt_onthefly
 
 
 class VMC_SR(NetKetVMC_SR):
@@ -77,8 +76,10 @@ class VMC_SR(NetKetVMC_SR):
             mode: The mode used to compute the jacobian or vjp of the variational state.
                 Can be `'real'` or `'complex'` (defaults to the dtype of the output of the model).
                 `real` can be used for real wavefunctions with a sign to further reduce the computational costs.
-            on_the_fly: Whether to compute the QGT or NTK matrix without evaluating the full jacobian. Defaults to True.
-                This ususally lowers the memory requirement and is necessary for large calculations.
+            on_the_fly: Whether to compute the NTK matrix without evaluating the full jacobian.
+                This usually lowers the memory requirement and is necessary for large calculations.
+                Only supported together with ``use_ntk=True`` (importance-sampling weights / pdf
+                are not yet supported in the on-the-fly path).
             use_ntk: Whether to use the NTK instead of the QGT for the computation of the updates.
             variational_state: The :class:`netket.vqs.MCState` to be optimised. Other variational states are not supported.
             chunk_size_bwd: The chunk size to use for the backward pass (jacobian or vjp evaluation).
@@ -116,13 +117,14 @@ class VMC_SR(NetKetVMC_SR):
         """Returns the function to compute the NGD update based on the evaluation mode."""
         if self.use_ntk:
             if self.on_the_fly:
-                raise NotImplementedError
-                # return srt_onthefly
+                return srt_onthefly
             else:
                 return srt
         else:
             if self.on_the_fly:
-                raise NotImplementedError
+                raise NotImplementedError(
+                    "on_the_fly=True is only supported together with use_ntk=True."
+                )
             else:
                 return sr
 
