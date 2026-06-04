@@ -10,7 +10,7 @@ import optax
 from scipy.stats import gaussian_kde
 from tqdm import tqdm
 
-from netket_foundation._src.model.vit import ViTFNQS
+from netket_foundation.model import ViTFNQS
 
 
 key = jax.random.key(1)

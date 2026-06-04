@@ -23,7 +23,7 @@ import jax.numpy as jnp
 import netket as nk
 import netket_foundation as nkf
 
-from netket_foundation._src.model.vit import ViTFNQS
+from netket_foundation.model import ViTFNQS
 from netket_foundation.observable import SusceptibilityObservable
 
 L = 6

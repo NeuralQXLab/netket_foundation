@@ -7,7 +7,7 @@ keeping each file self-contained while avoiding code duplication.
 import jax.numpy as jnp
 import netket as nk
 import netket_foundation as nkf
-from netket_foundation._src.model.vit import ViTFNQS
+from netket_foundation.model import ViTFNQS
 
 # Small system: 4 spins, patch size 2 → L_eff = 2
 L = 4

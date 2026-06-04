@@ -29,7 +29,7 @@ import netket as nk
 import netket_foundation as nkf
 import optax
 
-from netket_foundation._src.model.vit import ViTFNQS
+from netket_foundation.model import ViTFNQS
 
 # --- Hilbert space + parameter space ---
 # The parameter space spans the values of `h` we want to learn jointly.
