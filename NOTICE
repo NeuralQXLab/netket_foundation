@@ -1,0 +1,21 @@
+netket_foundation
+Copyright 2026 The NeuralQX Lab
+
+This product includes software developed by The NeuralQX Lab
+(École Polytechnique), led by Filippo Vicentini (https://filippovicentini.com).
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file
+for the full license text.
+
+-------------------------------------------------------------------------------
+
+This product includes code derived from NetKet
+(https://github.com/netket/netket).
+
+Copyright The NetKet Authors.
+
+NetKet is licensed under the Apache License, Version 2.0.
+
+Modifications from the original NetKet code include adapting the operators
+to work under JAX dynamic tracing, and extending the Stochastic
+Reconfiguration (SR) code to support foundation-model training.

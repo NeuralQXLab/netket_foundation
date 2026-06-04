@@ -6,8 +6,14 @@ build-backend = "hatchling.build"
 name = "netket-foundation"
 version = "0.1.0"
 description = "Foundation models and utilities for NetKet"
+authors = [
+    { name = "Filippo Vicentini", email = "filippo.vicentini@polytechnique.edu" },
+    { name = "The NeuralQX Lab" },
+]
 readme = "README.md"
 requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 keywords = ["machine learning", "quantum physics", "neural quantum states", "netket"]
 classifiers = [
     "Programming Language :: Python :: 3",
