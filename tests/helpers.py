@@ -27,7 +27,7 @@ def make_sampler(hi):
     return nk.sampler.MetropolisLocal(hi, n_chains=4)
 
 
-def make_model(ps):
+def make_model(ps, *, complex=False):
     return ViTFNQS(
         num_layers=1,
         d_model=4,
@@ -35,7 +35,7 @@ def make_model(ps):
         L_eff=L_EFF,
         n_coups=ps.size,
         b=B,
-        complex=False,
+        complex=complex,
         disorder=False,
         transl_invariant=False,
         two_dimensional=False,

@@ -63,7 +63,7 @@ mz_p = nkf.operator.ParametrizedOperator(
 
 # Train foundational state over parameter grid.
 optimizer = optax.sgd(0.005)
-driver = nkf.VMC_NG(ha_p, optimizer, variational_state=vs, diag_shift=1e-4)
+driver = nkf.VMC_SR(ha_p, optimizer, variational_state=vs, diag_shift=1e-4)
 
 log = nk.logging.JsonLog("2")
 driver.run(

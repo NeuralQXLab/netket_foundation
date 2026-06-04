@@ -17,7 +17,7 @@ classifiers = [
 dependencies = [
     "nqxpack>=0.1.13",
     "pandas>=3.0.2",
-    "netket",
+    "netket>=3.22",
     "matplotlib",
 ]
 
@@ -91,4 +91,3 @@ replace = 'version = "{new_version}"'
 
 [tool.uv.sources]
 neuralqxlab-sphinx-theme = { git = "https://github.com/NeuralQXLab/neuralqxlab-sphinx-theme" }
-netket = { git = "https://github.com/netket/netket", rev = "3be17e0" }

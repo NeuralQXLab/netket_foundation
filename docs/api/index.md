@@ -71,7 +71,7 @@ distribution, together with the corresponding result and diagnostics types.
    :toctree: generated
    :nosignatures:
 
-   netket_foundation.VMC_NG
+   netket_foundation.VMC_SR
 ```
 
 ## Operators

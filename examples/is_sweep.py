@@ -83,7 +83,7 @@ sa = nk.sampler.MetropolisLocal(hi, n_chains=256)
 vs = nkf.FoundationalQuantumState(sa, ma, ps, n_samples=1024, n_replicas=8, seed=1)
 vs.parameter_array = jnp.linspace(0.75, 2.0, vs.n_replicas).reshape(-1, 1)
 
-gs = nkf.VMC_NG(ha_p, optax.sgd(0.01), variational_state=vs, diag_shift=1e-2)
+gs = nkf.VMC_SR(ha_p, optax.sgd(0.01), variational_state=vs, diag_shift=1e-2)
 print("Training …")
 t0 = time.perf_counter()
 gs.run(200, show_progress=True)

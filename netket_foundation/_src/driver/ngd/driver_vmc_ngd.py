@@ -11,38 +11,32 @@ from netket.jax._jacobian.default_mode import JacobianMode
 from netket.stats import statistics, Stats, online_statistics
 
 # from netket._src.driver.abstract_optimization_driver import AbstractOptimizationDriver
-from netket.driver import VMC_SR
+from netket.driver import VMC_SR as NetKetVMC_SR
 from netket._src.ngd.sr_srt_common import get_samples_and_pdf
 from netket_foundation._src.driver.ngd.sr_srt_common import sr, srt
+from netket_foundation._src.driver.ngd.srt_onthefly import srt_onthefly
 
-# from netket_foundation._src.driver.ngd.srt_onthefly import srt_onthefly
 
-
-class VMC_NG(VMC_SR):
+class VMC_SR(NetKetVMC_SR):
     r"""
-    Energy minimization using Variational Monte Carlo (VMC) and Stochastic Reconfiguration (SR)
-    with or without its kernel formulation. The two approaches lead to *exactly* the same parameter
-    updates. In the kernel SR framework, the updates of the parameters can be written as:
+    Energy minimization using Variational Monte Carlo (VMC) and Stochastic Reconfiguration
+    (SR) / Natural Gradient Descent, specialized for the foundational training scheme.
 
-    .. math::
-        \delta \theta = \tau X(X^TX + \lambda \mathbb{I}_{2M})^{-1} f,
+    This driver tracks :class:`netket.driver.VMC_SR`, and we refer to its documentation for
+    a detailed description of the method, the available formulations (standard vs.
+    kernel/minSR), the matrix-inversion solvers, and the momentum/SPRING accelerator. All of
+    those options behave as documented there.
 
-    where :math:`X \in R^{P \times 2M}` is the concatenation of the real and imaginary part
-    of the centered Jacobian, with P the number of parameters and M the number of samples.
-    The vector f is the concatenation of the real and imaginary part of the centered local
-    energy. Note that, to compute the updates, it is sufficient to invert an :math:`M\times M` matrix
-    instead of a :math:`P\times P` one. As a consequence, this formulation is useful
-    in the typical deep learning regime where :math:`P \gg M`.
+    The difference is that this driver computes the SR/NGD formulas a bit differently in order
+    to better make use of the foundation training scheme: a single variational state holds
+    several replicas (one per point in :class:`~netket_foundation.ParameterSpace`, e.g. a range
+    of Hamiltonian parameters) and they are all trained simultaneously. The Jacobian and the
+    local energies carry an extra replica dimension, which is handled explicitly so that the
+    natural-gradient updates are computed per replica rather than mixing samples across
+    different physical points. The progress bar and logged loss therefore report per-replica
+    energy statistics (see ``log_replica_stats``) rather than a single-state energy.
 
-    See `R.Rende, L.L.Viteritti, L.Bardone, F.Becca and S.Goldt <https://arxiv.org/abs/2310.05715>`_
-    for a detailed description of the derivation. A similar result can be obtained by minimizing the
-    Fubini-Study distance with a specific constrain, see `A.Chen and M.Heyl <https://arxiv.org/abs/2302.01941>`_
-    for details.
-
-    When `momentum` is used, this driver implements the SPRING optimizer in
-    `G.Goldshlager, N.Abrahamsen and L.Lin <https://arxiv.org/abs/2401.10190>`_
-    to accumulate previous updates for better approximation of the exact SR with
-    no significant performance penalty.
+    For the underlying SR/NGD derivation and references, see :class:`netket.driver.VMC_SR`.
     """
 
     _replica_stats: Any = struct.field(pytree_node=False, serialize=False, default=None)
@@ -82,8 +76,10 @@ class VMC_NG(VMC_SR):
             mode: The mode used to compute the jacobian or vjp of the variational state.
                 Can be `'real'` or `'complex'` (defaults to the dtype of the output of the model).
                 `real` can be used for real wavefunctions with a sign to further reduce the computational costs.
-            on_the_fly: Whether to compute the QGT or NTK matrix without evaluating the full jacobian. Defaults to True.
-                This ususally lowers the memory requirement and is necessary for large calculations.
+            on_the_fly: Whether to compute the NTK matrix without evaluating the full jacobian.
+                This usually lowers the memory requirement and is necessary for large calculations.
+                Only supported together with ``use_ntk=True`` (importance-sampling weights / pdf
+                are not yet supported in the on-the-fly path).
             use_ntk: Whether to use the NTK instead of the QGT for the computation of the updates.
             variational_state: The :class:`netket.vqs.MCState` to be optimised. Other variational states are not supported.
             chunk_size_bwd: The chunk size to use for the backward pass (jacobian or vjp evaluation).
@@ -119,13 +115,14 @@ class VMC_NG(VMC_SR):
         """Returns the function to compute the NGD update based on the evaluation mode."""
         if self.use_ntk:
             if self.on_the_fly:
-                raise NotImplementedError
-                # return srt_onthefly
+                return srt_onthefly
             else:
                 return srt
         else:
             if self.on_the_fly:
-                raise NotImplementedError
+                raise NotImplementedError(
+                    "on_the_fly=True is only supported together with use_ntk=True."
+                )
             else:
                 return sr
 
