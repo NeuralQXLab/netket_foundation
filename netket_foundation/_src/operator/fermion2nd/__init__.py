@@ -13,7 +13,6 @@
 # limitations under the License.
 
 
-# __all__ = ["FermionOperator2nd", "FermionOperator2ndJax"]
+# __all__ = ["FermionOperator2ndJax"]
 
-from .numba import FermionOperator2nd
 from .jax import FermionOperator2ndJax
