@@ -23,7 +23,7 @@ class ParametrizedOperator(AbstractOperator):
 
     @property
     def dtype(self) -> DType:
-        return jnp.float64 if jax.enable_x64 else jnp.float32
+        return jnp.float64 if jax.config.x64_enabled else jnp.float32
 
     def tree_flatten(self):
         # self._setup()
