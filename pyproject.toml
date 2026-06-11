@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "netket-foundation"
-version = "0.1.0"
+version = "0.1.1"
 description = "Foundation models and utilities for NetKet"
 authors = [
     { name = "Filippo Vicentini", email = "filippo.vicentini@polytechnique.edu" },
@@ -93,7 +93,7 @@ ignore = [
 
 # To easily bump versions from github
 [tool.bumpversion]
-current_version = "0.1.0"
+current_version = "0.1.1"
 commit = true
 tag = true
 tag_name = "v{new_version}"
