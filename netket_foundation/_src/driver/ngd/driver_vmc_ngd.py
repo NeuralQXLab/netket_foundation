@@ -59,8 +59,8 @@ class VMC_SR(NetKetVMC_SR):
         variational_state: MCState = None,
         chunk_size_bwd: int | None = None,
         mode: JacobianMode | None = None,
-        use_ntk: bool = False,
-        on_the_fly: bool | None = False,
+        use_ntk: bool | None = None,
+        on_the_fly: bool | None = None,
     ):
         r"""
         Initialize the driver.
