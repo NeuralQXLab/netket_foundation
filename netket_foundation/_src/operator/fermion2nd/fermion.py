@@ -18,6 +18,7 @@ from netket.hilbert import SpinOrbitalFermions
 
 from netket_foundation._src.operator.fermion2nd.jax import FermionOperator2nd
 
+
 def destroy(
     hilbert: SpinOrbitalFermions,
     site: int,

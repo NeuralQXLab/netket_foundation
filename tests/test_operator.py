@@ -171,6 +171,7 @@ class TestNumberOperator:
             n = _to_dense(nkf.operator.number(fhi, i))
             np.testing.assert_allclose(n, n.conj().T, atol=1e-12)
 
+
 class TestHoppingHamiltonian:
     """Simple 2-site hopping: physical sanity checks."""
 

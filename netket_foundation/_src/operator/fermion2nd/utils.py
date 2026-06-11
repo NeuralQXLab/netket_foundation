@@ -55,6 +55,7 @@ def _cast_scalar_like(value, dtype):
 def _cast_weights_like(weights, dtype):
     return [_cast_scalar_like(weight, dtype)[0] for weight in weights]
 
+
 def _safe_allclose(a, b, *, atol: float) -> bool:
     if _is_tracer_like(a) or _is_tracer_like(b):
         return False

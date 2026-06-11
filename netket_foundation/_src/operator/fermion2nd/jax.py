@@ -28,6 +28,7 @@ from netket.utils.types import DType
 from .base import FermionOperator2ndBase
 from .utils import _is_diag_term, currently_jitting, _is_tracer_like
 
+
 @partial(jax.vmap, in_axes=(0, None, None))
 def _flip_daggers_split_cast_term_part(term, site_dtype, dagger_dtype):
     # splits sites and daggers out of terms, casts to desired dtype
