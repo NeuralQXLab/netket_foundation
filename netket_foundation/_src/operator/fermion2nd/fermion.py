@@ -13,56 +13,18 @@
 # limitations under the License.
 
 
-from netket.utils.types import DType as _DType
-from netket.hilbert import SpinOrbitalFermions as _SpinOrbitalFermions
+from netket.utils.types import DType
+from netket.hilbert import SpinOrbitalFermions
 
-from netket_foundation._src.operator.fermion2nd.utils import currently_jitting
-from netket_foundation._src.operator.fermion2nd.numba import (
-    FermionOperator2nd as _FermionOperator2nd,
-)
-
-
-def _resolve_impl():
-    """Return a tracer-safe fermion operator implementation."""
-
-    if currently_jitting():
-        try:
-            from netket_foundation._src.operator.fermion2nd.jax import (
-                FermionOperator2ndJax as _FermionOperator2ndJax,
-            )
-
-            return _FermionOperator2ndJax
-        except Exception:  # pragma: no cover - optional dependency fallback
-            pass
-    return _FermionOperator2nd
-
-
-def _build_operator(
-    hilbert,
-    terms=None,
-    *,
-    weights=None,
-    constant=0,
-    cutoff: float = 1e-10,
-    dtype: _DType | None = None,
-):
-    OpCls = _resolve_impl()
-    return OpCls(
-        hilbert,
-        terms,
-        weights=weights,
-        constant=constant,
-        cutoff=cutoff,
-        dtype=dtype,
-    )
+from netket_foundation._src.operator.fermion2nd.jax import FermionOperator2nd
 
 
 def destroy(
-    hilbert: _SpinOrbitalFermions,
+    hilbert: SpinOrbitalFermions,
     site: int,
     sz: int | None = None,
     cutoff: float = 1e-10,
-    dtype: _DType | None = None,
+    dtype: DType | None = None,
 ):
     """
     Builds the fermion destruction operator :math:`\\hat{a}` acting
@@ -82,7 +44,7 @@ def destroy(
         The resulting FermionOperator2nd
     """
     idx = _get_index(hilbert, site, sz)
-    return _build_operator(
+    return FermionOperator2nd(
         hilbert,
         (((idx, 0),),),
         cutoff=cutoff,
@@ -91,11 +53,11 @@ def destroy(
 
 
 def create(
-    hilbert: _SpinOrbitalFermions,
+    hilbert: SpinOrbitalFermions,
     site: int,
     sz: int | None = None,
     cutoff: float = 1e-10,
-    dtype: _DType | None = None,
+    dtype: DType | None = None,
 ):
     """
     Builds the fermion creation operator :math:`\\hat{a}^\\dagger` acting
@@ -115,7 +77,7 @@ def create(
         The resulting FermionOperator2nd
     """
     idx = _get_index(hilbert, site, sz)
-    return _build_operator(
+    return FermionOperator2nd(
         hilbert,
         (((idx, 1),),),
         cutoff=cutoff,
@@ -124,11 +86,11 @@ def create(
 
 
 def number(
-    hilbert: _SpinOrbitalFermions,
+    hilbert: SpinOrbitalFermions,
     site: int,
     sz: int | None = None,
     cutoff: float = 1e-10,
-    dtype: _DType | None = None,
+    dtype: DType | None = None,
 ):
     """
     Builds the number operator :math:`\\hat{a}^\\dagger\\hat{a}`  acting on the
@@ -149,7 +111,7 @@ def number(
         The resulting FermionOperator2nd
     """
     idx = _get_index(hilbert, site, sz)
-    return _build_operator(
+    return FermionOperator2nd(
         hilbert,
         (
             (
@@ -162,7 +124,7 @@ def number(
     )
 
 
-def _get_index(hilbert: _SpinOrbitalFermions, site: int, sz: int | None = None):
+def _get_index(hilbert: SpinOrbitalFermions, site: int, sz: int | None = None):
     """go from (site, spin_projection) indices to index in the (tensor) hilbert space"""
     if sz is None:
         if hasattr(hilbert, "spin") and hilbert.spin is not None:
@@ -186,9 +148,9 @@ def _get_index(hilbert: _SpinOrbitalFermions, site: int, sz: int | None = None):
 
 
 def identity(
-    hilbert: _SpinOrbitalFermions,
+    hilbert: SpinOrbitalFermions,
     cutoff: float = 1e-10,
-    dtype: _DType | None = None,
+    dtype: DType | None = None,
 ):
     """
     Builds the :math:`\\mathbb{I}` identity operator.
@@ -200,7 +162,7 @@ def identity(
     Returns:
         An instance of {class}`nk.operator.LocalOperator`.
     """
-    return _build_operator(
+    return FermionOperator2nd(
         hilbert,
         constant=1,
         cutoff=cutoff,
@@ -209,9 +171,9 @@ def identity(
 
 
 def zero(
-    hilbert: _SpinOrbitalFermions,
+    hilbert: SpinOrbitalFermions,
     cutoff: float = 1e-10,
-    dtype: _DType | None = None,
+    dtype: DType | None = None,
 ):
     """
     Builds the :math:`0` operator, which has no connected components.
@@ -224,7 +186,7 @@ def zero(
 
     Returns:
         An instance of {class}`nk.operator.LocalOperator`."""
-    return _build_operator(
+    return FermionOperator2nd(
         hilbert,
         constant=0,
         cutoff=cutoff,

@@ -5,14 +5,9 @@ from numbers import Number
 
 import numpy as np
 
-try:  # pragma: no cover - optional dependency
-    import jax
-    import jax.numpy as jnp
-    from jax import core as _jax_core
-except ImportError:  # pragma: no cover - optional dependency
-    jax = None
-    jnp = None
-    _jax_core = None
+import jax
+import jax.numpy as jnp
+from jax import core as _jax_core
 
 from netket.jax import canonicalize_dtypes
 from netket.utils.types import DType, PyTree
@@ -47,8 +42,6 @@ def _safe_isclose_zero(value, *, atol: float | None = None) -> bool:
 
 def _cast_scalar_like(value, dtype):
     if _is_tracer_like(value):
-        if jnp is None:  # fallback: keep original tracer
-            return value, False
         return jnp.asarray(value, dtype=dtype), False
 
     arr = np.array(value, dtype=dtype)
@@ -63,15 +56,6 @@ def _cast_weights_like(weights, dtype):
     return [_cast_scalar_like(weight, dtype)[0] for weight in weights]
 
 
-def _conjugate_like(value):
-    if jnp is not None:
-        try:
-            return jnp.conjugate(value)
-        except TypeError:  # pragma: no cover - fallback path
-            pass
-    return np.conjugate(value)
-
-
 def _safe_allclose(a, b, *, atol: float) -> bool:
     if _is_tracer_like(a) or _is_tracer_like(b):
         return False
@@ -79,8 +63,6 @@ def _safe_allclose(a, b, *, atol: float) -> bool:
     try:
         res = np.isclose(a, b, atol=atol)
     except Exception:
-        if jnp is None:
-            return False
         try:
             res = jnp.isclose(a, b, atol=atol)
         except Exception:  # pragma: no cover - defensive
@@ -314,7 +296,7 @@ def _herm_conj(
 ) -> tuple[OperatorTermsList, OperatorWeightsList]:
     """Returns the hermitian conjugate of the terms and weights."""
     conj_term = transpose_terms(terms)
-    conj_weight = [_conjugate_like(weight) for weight in weights]
+    conj_weight = [jnp.conjugate(weight) for weight in weights]
     return conj_term, conj_weight
 
 

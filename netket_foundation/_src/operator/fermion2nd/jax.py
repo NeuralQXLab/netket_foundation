@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from functools import partial, wraps
-from typing import TYPE_CHECKING
 
 import jax
 import jax.numpy as jnp
@@ -28,9 +27,6 @@ from netket.utils.types import DType
 
 from .base import FermionOperator2ndBase
 from .utils import _is_diag_term, currently_jitting, _is_tracer_like
-
-if TYPE_CHECKING:
-    from .numba import FermionOperator2nd
 
 
 @partial(jax.vmap, in_axes=(0, None, None))
@@ -505,7 +501,7 @@ def n_conn_jax(dtype, tl_diag, tl_offdiag, x, apply_terms_fun=apply_terms_scan):
 
 
 @register_pytree_node_class
-class FermionOperator2ndJax(FermionOperator2ndBase, DiscreteJaxOperator):
+class FermionOperator2nd(FermionOperator2ndBase, DiscreteJaxOperator):
     r"""
     A fermionic operator in :math:`2^{nd}` quantization using pure jax dark
     magic for indexing.
@@ -518,9 +514,6 @@ class FermionOperator2ndJax(FermionOperator2ndBase, DiscreteJaxOperator):
     When using native (experimental) sharding, or when working with GPUs,
     we reccomend using this implementations of the operators for potentially
     better performance.
-
-    Can be converted to the Numba one with the method
-    :meth:`~netket.operator.FermionOperator2ndJax.to_numba_operator()`.
     """
 
     @wraps(FermionOperator2ndBase.__init__)
@@ -622,17 +615,6 @@ class FermionOperator2ndJax(FermionOperator2ndBase, DiscreteJaxOperator):
         op._initialized = True
         (op._terms_list_diag, op._terms_list_offdiag) = data
         return op
-
-    def to_numba_operator(self) -> "FermionOperator2nd":  # noqa: F821
-        """
-        Returns the standard numba version of this operator, which is an
-        instance of :class:`netket.operator.FermionOperator2nd`.
-        """
-        from .numba import FermionOperator2nd
-
-        new_op = FermionOperator2nd(self.hilbert, cutoff=self._cutoff, dtype=self.dtype)
-        new_op._operators = self._operators.copy()
-        return new_op
 
     def get_conn_padded(self, x):
         self._setup()

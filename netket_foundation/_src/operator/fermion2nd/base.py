@@ -486,27 +486,10 @@ class FermionOperator2ndBase(DiscreteOperator):
         """
         if concrete:
             new = type(self)(self.hilbert, dtype=self.dtype, cutoff=self._cutoff)
-            # operators (c,c†) are real already. Only conjugate coefficients if needed.
             new._operators = {transpose_term(k): v for k, v in self._operators.items()}
             return new
         else:
             return Transpose(self)
-
-    def conjugate(self, *, concrete=False):
-        r"""Returns the complex conjugate of this operator.
-
-        This implementation always returns the concrete version of the operator.
-        """
-        del concrete
-
-        # if operator is real dtype, then just return a copy
-        if not np.issubdtype(self.dtype, np.complexfloating):
-            return self.copy()
-        else:
-            new = type(self)(self.hilbert, dtype=self.dtype, cutoff=self._cutoff)
-            # operators (c,c†) are real already. Only conjugate coefficients if needed.
-            new._operators = {k: np.conjugate(v) for k, v in self._operators.items()}
-            return new
 
     def to_normal_order(self):
         """Reoder the operators to normal order.

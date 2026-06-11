@@ -10,10 +10,6 @@ from netket_foundation._src.operator.pauli_strings.operators import (
 )
 
 from netket_foundation._src.operator.fermion2nd.jax import (
-    FermionOperator2ndJax as FermionOperator2ndJax,
-)
-
-from netket_foundation._src.operator.fermion2nd.numba import (
     FermionOperator2nd as FermionOperator2nd,
 )
 
