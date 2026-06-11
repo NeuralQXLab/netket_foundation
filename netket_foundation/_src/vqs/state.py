@@ -551,6 +551,7 @@ class FoundationalQuantumState(VariationalState):
         variables = {
             "foundational": {"parameters": jnp.asarray(parameters)},
             "params": self.parameters,
+            **self.model_state    
         }
 
         if seed is None:
