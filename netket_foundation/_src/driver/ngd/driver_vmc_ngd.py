@@ -56,7 +56,7 @@ class VMC_SR(NetKetVMC_SR):
         proj_reg: ScalarOrSchedule | None = None,
         momentum: ScalarOrSchedule | None = None,
         linear_solver: Callable[[Array, Array], Array] = cholesky_with_fallback,
-        variational_state: MCState = None,
+        variational_state: MCState,
         chunk_size_bwd: int | None = None,
         mode: JacobianMode | None = None,
         use_ntk: bool | None = None,
@@ -82,10 +82,6 @@ class VMC_SR(NetKetVMC_SR):
             use_ntk: Whether to use the NTK instead of the QGT for the computation of the updates.
             variational_state: The :class:`netket.vqs.MCState` to be optimised. Other variational states are not supported.
             chunk_size_bwd: The chunk size to use for the backward pass (jacobian or vjp evaluation).
-            collect_quadratic_model: Whether to collect the quadratic model. The quantities collected are the linear and quadratic term in the approximation of the loss function. They are stored in the info dictionary of the driver.
-
-        Returns:
-            The new parameters, the old updates, and the info dictionary.
         """
         # self._ham = hamiltonian.collect()  # type: AbstractOperator
 
