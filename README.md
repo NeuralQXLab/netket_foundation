@@ -10,7 +10,7 @@ You can install `netket-foundation` with `pip` or `uv` using one of the two comm
 
 ```sh
 uv add netket-foundation
-pip install --upgrade nektet-foundation
+pip install --upgrade netket-foundation
 ```
 
 **With GPU support (Linux only):**
@@ -20,15 +20,15 @@ uv add netket-foundation 'netket[cuda]'
 
 **Development version:**
 ```sh
-uv add git+https://github.com/NeuralQXLab/netket_foundation.git
+uv add git+https://github.com/netket/netket_foundation.git
 ```
 
 For detailed installation instructions of NetKet, including GPU setup, we refer to [its installation guide](https://netket.readthedocs.io/en/latest/install.html).
 
 ## Getting Started
 
-To get started with NetKet Foundation, we recommend you give a look at our [tutorials](https://github.com/NeuralQXLab/netket_foundation/tree/main/docs/tutorials), by running them on your computer or on [Google Colaboratory](https://colab.research.google.com).
-There are also several [example scripts](https://github.com/NeuralQXLab/netket_foundation/tree/main/examples) that you can download, run and edit that showcase some use-cases of NetKet Foundation, although they are not commented.
+To get started with NetKet Foundation, we recommend you give a look at our [tutorials](https://github.com/netket/netket_foundation/tree/main/docs/tutorials), by running them on your computer or on [Google Colaboratory](https://colab.research.google.com).
+There are also several [example scripts](https://github.com/netket/netket_foundation/tree/main/examples) that you can download, run and edit that showcase some use-cases of NetKet Foundation, although they are not commented.
 
 If you want to get in touch with us, feel free to open an issue or a discussion here on GitHub, or to join the MLQuantum slack group where several people involved with NetKet hang out.
 The link is on [NetKet's website](https://www.netket.org).

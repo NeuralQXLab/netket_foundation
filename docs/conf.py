@@ -30,6 +30,9 @@ release = "0.1.0"
 
 html_context = {
     **html_context,  # noqa: F405
+    # The theme's conf_base defaults github_user to NeuralQXLab; this repo
+    # now lives under the netket organisation.
+    "github_user": "netket",
     "github_repo": "netket_foundation",
 }
 
@@ -50,10 +53,17 @@ html_static_path = ["_static"]
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md"]
 
-linkcode_resolve = make_linkcode_resolve(
+_linkcode_resolve = make_linkcode_resolve(
     github_repo="netket_foundation",
     repo_root=Path(__file__).parent.parent,
 )
+
+
+def linkcode_resolve(domain, info):
+    # make_linkcode_resolve hardcodes the NeuralQXLab org; the repo now lives
+    # under the netket organisation.
+    url = _linkcode_resolve(domain, info)
+    return url and url.replace("github.com/NeuralQXLab/", "github.com/netket/")
 
 # netket_foundation uses Google-style docstrings
 napoleon_google_docstring = True

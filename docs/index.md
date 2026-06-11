@@ -30,7 +30,7 @@ Installation and a minimal working example.
 :::
 
 :::{grid-item-card} 💡 Examples
-:link: https://github.com/NeuralQXLab/netket_foundation/tree/main/examples
+:link: https://github.com/netket/netket_foundation/tree/main/examples
 :link-type: url
 
 Step-by-step guides covering the main workflows.

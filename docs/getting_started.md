@@ -11,7 +11,7 @@ uv add netket-foundation
 Or in development mode after cloning:
 
 ```bash
-git clone https://github.com/NeuralQXLab/netket_foundation.git
+git clone https://github.com/netket/netket_foundation.git
 cd netket_foundation
 uv run python
 ```
@@ -72,7 +72,7 @@ gs.run(n_iter=300)
 ```
 
 :::{note}
-See the [`examples/`](https://github.com/NeuralQXLab/netket_foundation/tree/main/examples)
+See the [`examples/`](https://github.com/netket/netket_foundation/tree/main/examples)
 directory for full runnable scripts.
 :::
 

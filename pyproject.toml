@@ -39,10 +39,10 @@ dependencies = [
 openfermion = ["openfermion"]
 
 [project.urls]
-Homepage = "https://github.com/NeuralQXLab/netket_foundation"
-Documentation = "https://neuralqxlab.github.io/netket_foundation"
-Repository = "https://github.com/NeuralQXLab/netket_foundation"
-Issues = "https://github.com/NeuralQXLab/netket_foundation/issues"
+Homepage = "https://github.com/netket/netket_foundation"
+Documentation = "https://netket.github.io/netket_foundation"
+Repository = "https://github.com/netket/netket_foundation"
+Issues = "https://github.com/netket/netket_foundation/issues"
 
 [tool.hatch.build]
 include = ["netket_foundation*"]
