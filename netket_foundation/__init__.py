@@ -11,6 +11,7 @@ from netket_foundation._src.driver.ngd.driver_vmc_ngd import VMC_SR as VMC_SR
 from netket_foundation import operator as operator
 from netket_foundation import expectation_value as expectation_value
 from netket_foundation import observable as observable
+from netket_foundation import stats as stats
 from netket_foundation import vqs as vqs
 from netket_foundation import model as model
 

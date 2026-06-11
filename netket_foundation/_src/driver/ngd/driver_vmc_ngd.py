@@ -1,17 +1,16 @@
 from typing import Any, Callable
 
-import jax.numpy as jnp
-
 from netket.optimizer.solver import cholesky_with_fallback
 from netket.utils.types import Array, Optimizer, ScalarOrSchedule
 from netket.operator import AbstractOperator
 from netket.utils import timing, struct
 from netket.vqs.mc import MCState
 from netket.jax._jacobian.default_mode import JacobianMode
-from netket.stats import statistics, Stats, online_statistics
+from netket.stats import statistics, online_statistics
 
 # from netket._src.driver.abstract_optimization_driver import AbstractOptimizationDriver
 from netket.driver import VMC_SR as NetKetVMC_SR
+from netket_foundation._src.stats import combine_replica_stats
 from netket._src.ngd.sr_srt_common import get_samples_and_pdf
 from netket_foundation._src.driver.ngd.sr_srt_common import sr, srt
 from netket_foundation._src.driver.ngd.srt_onthefly import srt_onthefly
@@ -168,21 +167,9 @@ class VMC_SR(NetKetVMC_SR):
                 statistics(local_e_by_replica[r]) for r in range(n_replicas)
             ]
 
-        # Combine per-replica Stats into a single summary.
-        # Mean: average of replica means.
-        # Error of mean: quadrature sum divided by n_replicas (SE of the grand mean).
-        # Variance: mean of per-replica variances.
-        # R_hat: max across replicas (most conservative convergence indicator).
-        means = jnp.array([s.mean for s in self._replica_stats])
-        errors = jnp.array([s.error_of_mean for s in self._replica_stats])
-        variances = jnp.array([s.variance for s in self._replica_stats])
-        rhats = jnp.array([s.R_hat for s in self._replica_stats])
-        self._loss_stats = Stats(
-            mean=jnp.mean(means),
-            error_of_mean=jnp.sqrt(jnp.nansum(errors**2)) / n_replicas,
-            variance=jnp.nansum(variances) / n_replicas,
-            R_hat=jnp.nanmax(rhats),
-        )
+        # Combine per-replica Stats into a single summary (mean of replica
+        # means, errors in quadrature / n, mean variance, max R_hat).
+        self._loss_stats = combine_replica_stats(self._replica_stats)
 
         diag_shift = self.diag_shift
         proj_reg = self.proj_reg

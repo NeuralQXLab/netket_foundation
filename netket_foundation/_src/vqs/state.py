@@ -58,6 +58,7 @@ from netket_foundation._src.operator.parametrized import (
 from jax.sharding import NamedSharding, PartitionSpec as P
 from netket_foundation._src.hilbert.parameter_space import ParameterSpace
 from netket_foundation._src.nn.instance_wrapper import FoundationalInstance
+from netket_foundation._src.stats import ReplicaStats
 
 
 def wrap_sampler(sampler, parameter_space, joint_space):
@@ -804,15 +805,17 @@ def expect(  # noqa: F811
     σ, args = get_local_kernel_arguments(vstate, Ô)
     local_estimator_fun = get_local_kernel(vstate, Ô)
 
-    return _expect(
-        local_estimator_fun,
-        vstate._apply_fun,
-        vstate.sampler.machine_pow,
-        vstate.parameters,
-        vstate.model_state,
-        σ,
-        args,
-        n_replicas=vstate.n_replicas,
+    return ReplicaStats(
+        _expect(
+            local_estimator_fun,
+            vstate._apply_fun,
+            vstate.sampler.machine_pow,
+            vstate.parameters,
+            vstate.model_state,
+            σ,
+            args,
+            n_replicas=vstate.n_replicas,
+        )
     )
 
 
