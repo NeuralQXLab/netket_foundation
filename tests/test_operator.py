@@ -122,11 +122,11 @@ class TestFermionConstructors:
         assert hasattr(op, "get_conn_padded")
 
     def test_create_destroy_type(self, fhi):
-        from netket_foundation._src.operator.fermion2nd.numba import FermionOperator2nd
+        from netket_foundation._src.operator.fermion2nd import FermionOperator2ndJax
 
-        assert isinstance(nkf.operator.create(fhi, 0), FermionOperator2nd)
-        assert isinstance(nkf.operator.destroy(fhi, 0), FermionOperator2nd)
-        assert isinstance(nkf.operator.number(fhi, 0), FermionOperator2nd)
+        assert isinstance(nkf.operator.create(fhi, 0), FermionOperator2ndJax)
+        assert isinstance(nkf.operator.destroy(fhi, 0), FermionOperator2ndJax)
+        assert isinstance(nkf.operator.number(fhi, 0), FermionOperator2ndJax)
 
 
 class TestAnticommutation:
