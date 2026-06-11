@@ -32,7 +32,7 @@ class VMC_SR(NetKetVMC_SR):
     of Hamiltonian parameters) and they are all trained simultaneously. The Jacobian and the
     local energies carry an extra replica dimension, which is handled explicitly so that the
     natural-gradient updates are computed per replica rather than mixing samples across
-    different physical points. 
+    different physical points.
 
     This driver logs a loss (``Mean Energy``) which is the mean over replicas.
     The full per-replica statistics (a :class:`~netket_foundation.stats.ReplicaStats`) are
