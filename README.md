@@ -1,38 +1,46 @@
 # NetKet Foundation
 
-NetKet Foundation is an extension library built on top of [NetKet](https://github.com/netket/netket) and [JAX](https://github.com/google/jax).
-It provides tools to train and evaluate *foundation neural quantum states* over families of Hamiltonians parameterized by couplings or disorder realizations.
+NetKet Foundation is an extension for [NetKet](https://github.com/netket/netket) to train and evaluate *foundation neural quantum states* over families of Hamiltonians parameterized by couplings or disorder realizations.
 
-The project is designed to reuse NetKet's ecosystem (samplers, operators, logging, drivers) while introducing foundational workflows where one model is optimized across many parameter points at once.
-
-## Main Additions
-
-Compared to base NetKet, this package introduces:
-
-- `ParameterSpace`: a Hilbert space class for Hamiltonian/control parameters.
-- `FoundationalQuantumState`: a variational state that samples physical configurations together with parameter replicas.
-- `ParametrizedOperator`: operators whose matrix elements are generated from per-sample parameters.
-- `VMC_SR`: a natural-gradient VMC driver adapted to foundational training.
+The library builds on top of NetKet's concepts (samplers, operators, logging, drivers) and introduces foundational workflows where one model is optimized across many parameter points at once.
 
 ## Installation
 
-NetKet Foundation requires Python 3.11+.
-
-Clone the repository and install dependencies with `uv`:
+You can install `netket-foundation` with `pip` or `uv` using one of the two commands below. We strongly recomend against using `conda`.
 
 ```sh
-git clone https://github.com/NeuralQXLab/netket_foundation.git
-cd netket_foundation
-uv sync
+uv add netket-foundation
+pip install --upgrade nektet-foundation
 ```
 
-Using [uv](https://docs.astral.sh/uv/getting-started/installation/) gives you the exact dependency set used for development, pinned in `uv.lock`.
-
-You can also use pip, but we recommend `uv` for reproducibility:
-
+**With GPU support (Linux only):**
 ```sh
-pip install -e .
+uv add netket-foundation 'netket[cuda]'
 ```
+
+**Development version:**
+```sh
+uv add git+https://github.com/NeuralQXLab/netket_foundation.git
+```
+
+For detailed installation instructions of NetKet, including GPU setup, we refer to [its installation guide](https://netket.readthedocs.io/en/latest/install.html).
+
+## Getting Started
+
+To get started with NetKet Foundation, we recommend you give a look at our [tutorials](https://github.com/NeuralQXLab/netket_foundation/tree/main/docs/tutorials), by running them on your computer or on [Google Colaboratory](https://colab.research.google.com).
+There are also several [example scripts](https://github.com/NeuralQXLab/netket_foundation/tree/main/examples) that you can download, run and edit that showcase some use-cases of NetKet Foundation, although they are not commented.
+
+If you want to get in touch with us, feel free to open an issue or a discussion here on GitHub, or to join the MLQuantum slack group where several people involved with NetKet hang out.
+The link is on [NetKet's website](https://www.netket.org).
+
+
+**New concepts:**
+
+Compared to base NetKet, this package introduces:
+
+- `ParameterSpace`: a Hilbert-space-like class describing the space where hamiltonian parameters live.
+- `FoundationalQuantumState`: a variational state that samples physical configurations together with parameter replicas.
+- `ParametrizedOperator`: operators whose matrix elements are generated from per-sample parameters.
 
 ## Minimal Usage
 
@@ -95,12 +103,3 @@ optimizer = optax.sgd(5e-3)
 driver = nkf.VMC_SR(ham, optimizer, variational_state=vstate, diag_shift=1e-4)
 driver.run(100)
 ```
-
-## Examples
-
-See complete scripts in:
-
-- `examples/ising1d.py`: foundational training on the Ising chain.
-- `examples/ising1d_uniform.py`: foundational training on the disordered Ising chain.
-- `examples/susceptibility.py`: full fidelity-susceptibility workflow, including IS.
-- `examples/susceptibility_to_precision.py`: minimal example for adaptive susceptibility estimation.
