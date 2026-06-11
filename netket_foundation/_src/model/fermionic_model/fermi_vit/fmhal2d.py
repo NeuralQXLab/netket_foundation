@@ -112,7 +112,6 @@ class FactoredAttention(nn.Module):
             )  # h matrices of size Np x Np
 
         elif self.graph.pbc[0] == self.graph.pbc[1]:
-
             self.base_J = self.param("J", init, (self.heads, sidex, sidey))
 
             self.full_J = roll2d(

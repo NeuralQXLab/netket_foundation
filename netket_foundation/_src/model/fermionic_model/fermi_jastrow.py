@@ -1,6 +1,7 @@
 import flax.linen as nn
 import jax.numpy as jnp
-from typing import Callable, Any
+from typing import Any
+from collections.abc import Callable
 
 
 class foundation_fermi_Jastrow_MLP(nn.Module):

@@ -65,7 +65,6 @@ class OuputHead(nn.Module):
     def __call__(self, x):
 
         if self.make_it_invariant:
-
             # Pool translation copies before the final projection when invariance is requested.
             x = self.layer_norm(x.sum(axis=-2))  # (N_T, N_P, d) -> (N_T, d)
             x = self.dense_expand(x)  # (N_T, d) -> (N_T, N_lat)
@@ -76,18 +75,15 @@ class OuputHead(nn.Module):
             x = x.flatten()
 
             if self.is_complex:
-
                 # Keep amplitude and sign channels separate so each can be normalized independently.
                 amp = self.norm_amp(self.output_layer_amp(x))
                 sign = self.norm_sign(self.output_layer_sign(x))
                 out = amp + 1j * sign
 
             else:
-
                 out = self.output_layer(x)
 
         elif self.is_equivariant:
-
             # Preserve the translation axis and project each orbit element independently.
 
             x = x.reshape(-1, self.d_model)  # (N_P, N_T, d) -> (N_o, d)
@@ -97,7 +93,6 @@ class OuputHead(nn.Module):
                 self.output_layer(x)
             ).flatten()  # (N_o, N_lat) -> (N_o, N_fermions)
         else:
-
             # In the non-equivariant branch, aggregate patch features before the readout.
 
             x = self.dense_expand(x)

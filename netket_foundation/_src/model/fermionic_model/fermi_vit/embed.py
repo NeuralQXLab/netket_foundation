@@ -99,7 +99,6 @@ class Embed(nn.Module):
                 and (self.graph is not None)
                 and (self.b > 1)
             ):
-
                 if self.b > 2:
                     raise NotImplementedError(
                         "Equivariance is only implemented for b>2"

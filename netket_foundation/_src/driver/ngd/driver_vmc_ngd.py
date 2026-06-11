@@ -1,4 +1,5 @@
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from netket.optimizer.solver import cholesky_with_fallback
 from netket.utils.types import Array, Optimizer, ScalarOrSchedule

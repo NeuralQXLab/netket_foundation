@@ -171,7 +171,6 @@ class foundation_backflow(nn.Module):
 
 
 class foundation_generalized_backflow(nn.Module):
-
     model: Any
     hilbert: Any  # SpinOrbitalFermions
     enforce_spin_flip: bool = False

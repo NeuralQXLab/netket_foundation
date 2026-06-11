@@ -100,7 +100,6 @@ class FactoredAttention(nn.Module):
             self.full_J = self.base_J  # Non translational invariant.
 
         elif self.graph.pbc[0]:
-
             self.base_J = self.param(
                 "J", init, (self.heads, self.n_patches), dtype=self.param_dtype
             )

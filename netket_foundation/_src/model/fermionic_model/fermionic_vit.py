@@ -1,4 +1,5 @@
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 import jax.numpy as jnp
 import flax.linen as nn

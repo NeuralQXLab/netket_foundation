@@ -89,8 +89,8 @@ for _ in range(4):
 
 chi = mc.expect(SusceptibilityObservable(hi))
 print("\n[Method 1] susceptibility at h=1.0")
-print(f"  chi = {float(chi.mean[0,0]):.5f}")
-print(f"  err = {float(chi.error_of_mean[0,0]):.5f}")
+print(f"  chi = {float(chi.mean[0, 0]):.5f}")
+print(f"  err = {float(chi.error_of_mean[0, 0]):.5f}")
 
 # ---------------------------------------------------------------------------
 # Method 2: susceptibility_to_precision — sample until error is small enough
@@ -104,8 +104,8 @@ mc_fresh.sample()
 chi3 = mc_fresh.expect_to_precision(
     SusceptibilityObservable(hi), atol=5e-3, verbose=True
 ).get_stats()
-print(f"  chi = {float(chi3.mean[0,0]):.5f}")
-print(f"  err = {float(chi3.error_of_mean[0,0]):.5f}")
+print(f"  chi = {float(chi3.mean[0, 0]):.5f}")
+print(f"  err = {float(chi3.error_of_mean[0, 0]):.5f}")
 print(f"  converged: {float(jnp.max(chi3.error_of_mean)) <= 5e-3}")
 
 # ---------------------------------------------------------------------------
@@ -123,8 +123,8 @@ for _ in range(8):
 is_st = ISState.from_mc_state(mc_ref, h0)
 
 chi4 = is_st.expect(SusceptibilityObservable(hi))
-print(f"  chi = {float(chi4.mean[0,0]):.5f}")
-print(f"  err = {float(chi4.error_of_mean[0,0]):.5f}")
+print(f"  chi = {float(chi4.mean[0, 0]):.5f}")
+print(f"  err = {float(chi4.error_of_mean[0, 0]):.5f}")
 print(f"  ESS = {is_st.ess:.0f} ({is_st.ess_fraction:.1%})")
 
 # ---------------------------------------------------------------------------

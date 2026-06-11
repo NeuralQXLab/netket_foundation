@@ -6,7 +6,6 @@ from netket_foundation._src.hilbert.parameter_space import ParameterSpace
 
 
 class FoundationalInstance(nn.Module):
-
     parameter_space: ParameterSpace
     module: nn.Module
 

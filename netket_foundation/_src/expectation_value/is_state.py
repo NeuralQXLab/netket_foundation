@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from functools import partial
-from typing import Callable
+from collections.abc import Callable
 
 import jax
 import jax.numpy as jnp

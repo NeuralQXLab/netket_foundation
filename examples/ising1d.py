@@ -56,8 +56,9 @@ ha_p = nkf.operator.ParametrizedOperator(hi, ps, create_operator)
 mz_p = nkf.operator.ParametrizedOperator(
     hi,
     ps,
-    lambda _: sum(nkf.operator.sigmaz(hi, i) for i in range(hi.size))
-    * (1 / float(hi.size)),
+    lambda _: (
+        sum(nkf.operator.sigmaz(hi, i) for i in range(hi.size)) * (1 / float(hi.size))
+    ),
 )
 
 

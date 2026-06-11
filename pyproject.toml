@@ -74,29 +74,22 @@ pythonpath = ["tests"]
 [tool.ruff]
 target-version = "py311"
 line-length = 88
-# Lint everything except examples (which are only formatted, not linted)
-extend-exclude = ["examples"]
 
 [tool.ruff.lint]
+# Lint everything except examples (which are only formatted, not linted)
+exclude = ["examples/*"]
 select = ["E", "F", "W", "UP"]
 fixable = ["ALL"]
 ignore = [
-    "E501",   # line too long (black handles this)
+    "E501",   # line too long (the formatter handles this)
     "E731",   # lambda assignment
     "E721",   # type comparison
     "E741",   # ambiguous variable names (common in physics: l, O, I)
-    "UP007",  # Optional[X] -> X | None  (too pervasive, style choice)
-    "UP035",  # deprecated typing imports
-    "UP045",  # Optional[X] -> X | None  (same as UP007 for newer ruff)
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402", "F401"]
 "tests/*" = ["E402"]
-
-[tool.black]
-line-length = 88
-target-version = ["py311", "py312", "py313"]
 
 # To easily bump versions from github
 [tool.bumpversion]
