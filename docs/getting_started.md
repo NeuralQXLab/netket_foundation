@@ -5,7 +5,7 @@
 Install `netket_foundation` from source:
 
 ```bash
-uv add git+https://github.com/NeuralQXLab/netket_foundation.git
+uv add netket-foundation
 ```
 
 Or in development mode after cloning:
