@@ -16,7 +16,7 @@
 from netket.utils.types import DType
 from netket.hilbert import SpinOrbitalFermions
 
-from netket_foundation._src.operator.fermion2nd.jax  import FermionOperator2ndJax
+from netket_foundation._src.operator.fermion2nd.jax import FermionOperator2nd
 
 def destroy(
     hilbert: SpinOrbitalFermions,
@@ -43,7 +43,7 @@ def destroy(
         The resulting FermionOperator2nd
     """
     idx = _get_index(hilbert, site, sz)
-    return FermionOperator2ndJax(
+    return FermionOperator2nd(
         hilbert,
         (((idx, 0),),),
         cutoff=cutoff,
@@ -76,7 +76,7 @@ def create(
         The resulting FermionOperator2nd
     """
     idx = _get_index(hilbert, site, sz)
-    return FermionOperator2ndJax(
+    return FermionOperator2nd(
         hilbert,
         (((idx, 1),),),
         cutoff=cutoff,
@@ -110,7 +110,7 @@ def number(
         The resulting FermionOperator2nd
     """
     idx = _get_index(hilbert, site, sz)
-    return FermionOperator2ndJax(
+    return FermionOperator2nd(
         hilbert,
         (
             (
@@ -161,7 +161,7 @@ def identity(
     Returns:
         An instance of {class}`nk.operator.LocalOperator`.
     """
-    return FermionOperator2ndJax(
+    return FermionOperator2nd(
         hilbert,
         constant=1,
         cutoff=cutoff,
@@ -185,7 +185,7 @@ def zero(
 
     Returns:
         An instance of {class}`nk.operator.LocalOperator`."""
-    return FermionOperator2ndJax(
+    return FermionOperator2nd(
         hilbert,
         constant=0,
         cutoff=cutoff,

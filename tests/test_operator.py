@@ -122,11 +122,11 @@ class TestFermionConstructors:
         assert hasattr(op, "get_conn_padded")
 
     def test_create_destroy_type(self, fhi):
-        from netket_foundation._src.operator.fermion2nd import FermionOperator2ndJax
+        from netket_foundation._src.operator.fermion2nd import FermionOperator2nd
 
-        assert isinstance(nkf.operator.create(fhi, 0), FermionOperator2ndJax)
-        assert isinstance(nkf.operator.destroy(fhi, 0), FermionOperator2ndJax)
-        assert isinstance(nkf.operator.number(fhi, 0), FermionOperator2ndJax)
+        assert isinstance(nkf.operator.create(fhi, 0), FermionOperator2nd)
+        assert isinstance(nkf.operator.destroy(fhi, 0), FermionOperator2nd)
+        assert isinstance(nkf.operator.number(fhi, 0), FermionOperator2nd)
 
 
 class TestAnticommutation:
@@ -170,32 +170,6 @@ class TestNumberOperator:
         for i in range(fhi.size):
             n = _to_dense(nkf.operator.number(fhi, i))
             np.testing.assert_allclose(n, n.conj().T, atol=1e-12)
-
-
-class TestNumbaJaxAgreement:
-    """FermionOperator2nd (Numba) and FermionOperator2ndJax produce identical matrix elements."""
-
-    def test_hopping_mels(self, fhi):
-        from netket_foundation._src.operator.fermion2nd.jax import FermionOperator2ndJax
-
-        # H = c0† c1 + c1† c0
-        hop_numba = nkf.operator.create(fhi, 0) @ nkf.operator.destroy(
-            fhi, 1
-        ) + nkf.operator.create(fhi, 1) @ nkf.operator.destroy(fhi, 0)
-        hop_jax = hop_numba.to_jax_operator()
-        assert isinstance(hop_jax, FermionOperator2ndJax)
-
-        mat_numba = _to_dense(hop_numba)
-        mat_jax = hop_jax.to_sparse().toarray()
-        np.testing.assert_allclose(mat_numba, mat_jax, atol=1e-12)
-
-    def test_number_mels(self, fhi):
-        n_numba = nkf.operator.number(fhi, 0) + nkf.operator.number(fhi, 1)
-        n_jax = n_numba.to_jax_operator()
-        np.testing.assert_allclose(
-            _to_dense(n_numba), n_jax.to_sparse().toarray(), atol=1e-12
-        )
-
 
 class TestHoppingHamiltonian:
     """Simple 2-site hopping: physical sanity checks."""

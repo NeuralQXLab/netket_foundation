@@ -500,7 +500,7 @@ def n_conn_jax(dtype, tl_diag, tl_offdiag, x, apply_terms_fun=apply_terms_scan):
 
 
 @register_pytree_node_class
-class FermionOperator2ndJax(FermionOperator2ndBase, DiscreteJaxOperator):
+class FermionOperator2nd(FermionOperator2ndBase, DiscreteJaxOperator):
     r"""
     A fermionic operator in :math:`2^{nd}` quantization using pure jax dark
     magic for indexing.
@@ -513,9 +513,6 @@ class FermionOperator2ndJax(FermionOperator2ndBase, DiscreteJaxOperator):
     When using native (experimental) sharding, or when working with GPUs,
     we reccomend using this implementations of the operators for potentially
     better performance.
-
-    Can be converted to the Numba one with the method
-    :meth:`~netket.operator.FermionOperator2ndJax.to_numba_operator()`.
     """
 
     @wraps(FermionOperator2ndBase.__init__)
