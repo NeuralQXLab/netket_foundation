@@ -69,7 +69,7 @@ def deserialize_FoundationalQuantumState(vstate, state_dict):
         serialization.from_state_dict(vstate.variables, state_dict["variables"]),
     )
     vars = serialization_utils.restore_prngkeys(vstate.variables, vars)
-    if config.netket_experimental_sharding:
+    if config.netket_sharding:
         vars = jax.tree_util.tree_map(
             lambda x, y: jax.lax.with_sharding_constraint(jnp.asarray(y), x.sharding),
             vstate.variables,

@@ -239,7 +239,7 @@ class FoundationalQuantumState(VariationalState):
 
         dummy_input = self.hilbert.random_state(key, 1, dtype=dtype)
 
-        if config.netket_experimental_sharding:
+        if config.netket_sharding:
             par_sharding = NamedSharding(jax.sharding.get_abstract_mesh(), P())
         else:
             par_sharding = None
